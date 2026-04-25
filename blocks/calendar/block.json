@@ -1,0 +1,42 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "event-calendar/calendar",
+	"version": "1.0.0",
+	"title": "Event Calendar",
+	"category": "widgets",
+	"icon": "calendar-alt",
+	"description": "Display events in a calendar view with filtering options",
+	"keywords": ["calendar", "events", "schedule"],
+	"textdomain": "event-calendar",
+	"attributes": {
+		"view": {
+			"type": "string",
+			"default": "month"
+		},
+		"postType": {
+			"type": "string",
+			"default": ""
+		},
+		"taxonomy": {
+			"type": "string",
+			"default": ""
+		},
+		"terms": {
+			"type": "array",
+			"items": {
+				"type": "number"
+			},
+			"default": []
+		},
+		"operator": {
+			"type": "string",
+			"default": "IN"
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": ["wide", "full"]
+	},
+	"render": "file:./render.php"
+}

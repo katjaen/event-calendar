@@ -1,0 +1,337 @@
+/* ================================== 
+	EVENT CALENDAR – CUSTOM STYLES
+	CSS variables and layout overrides;
+	theme object in calendar-init.js
+================================== */
+
+:root {
+	color-scheme: light dark;
+
+	/* --- Texts --- */
+	--ec-text-color: light-dark(oklch(20% 0.01 250), oklch(92% 0.01 250));
+	--ec-text-color-muted: light-dark(
+		color-mix(in oklch, var(--ec-text-color) 30%, var(--ec-bg-transparent)),
+		color-mix(in oklch, var(--ec-text-color) 30%, var(--ec-bg-transparent))
+	);
+
+	--ec-text-holiday: light-dark(
+		oklch(61.625% 0.19251 7.865),
+		oklch(74.841% 0.10792 1.168)
+	);
+	--ec-text-holiday-muted: light-dark(
+		color-mix(in oklch, var(--ec-text-holiday) 30%, var(--ec-bg-transparent)),
+		color-mix(in oklch, var(--ec-text-holiday) 30%, var(--ec-bg-transparent))
+	);
+
+	/* --- Accent --- */
+	--ec-accent: light-dark(
+		oklch(68.278% 0.14378 235.803),
+		oklch(48.889% 0.14378 235.803)
+	);
+
+	/* --- Events --- */
+	--ec-event-color-default: light-dark(
+		oklch(85% 0.08 290),
+		oklch(65% 0.08 290)
+	);
+
+	/* --- Backgrounds --- */
+	--ec-bg-cal-body: var(--ec-bg-transparent);
+	--ec-bg-cal-header: var(--ec-bg-transparent);
+	--ec-bg-cal-popup: var(--ec-bg-safe);
+
+	--ec-bg-transparent: transparent;
+	--ec-bg-safe: light-dark(
+		oklch(96.485% 0.01793 245.543),
+		oklch(32.518% 0.01576 248.37)
+	);
+	--ec-bg-weekend: light-dark(
+		oklab(83.28% 0 0 / 0.1),
+		oklab(89.143% 0 -0.0001 / 0.1)
+	);
+	--ec-bg-accent-today: color-mix(
+		in oklch,
+		var(--ec-accent) 15%,
+		var(--ec-bg-transparent)
+	);
+
+	/* --- Borders --- */
+	--ec-border-color: light-dark(
+		oklch(83.934% 0.03108 226.227),
+		oklch(51.204% 0.0315 228.361)
+	);
+	--ec-border-color-muted: color-mix(
+		in oklch,
+		var(--ec-border-color),
+		var(--ec-bg-transparent)
+	);
+
+	--ec-border: var(--ec-border-color, rgba(140, 140, 140, 0.15)) solid 1px;
+	--ec-border-muted: var(--ec-border-color-muted, rgba(140, 140, 140, 0.02))
+		solid 1px;
+
+	--ec-btn-border-radius: 55px;
+	--ec-transition: all 0.2s ease;
+
+	/* --- Widths --- */
+	--ec-grid-left-width: 66px;
+	--ec-header-height: 38px;
+
+	--ec-hour-start: 6;
+	--ec-hour-end: 24;
+}
+
+/* ==================================
+	ACSS ALT COLOR SCHEME
+================================== */
+
+:root.color-scheme--alt {
+	/* --- Texts --- */
+	--ec-text-color: oklch(92% 0.01 250);
+	--ec-text-color-muted: color-mix(
+		in oklch,
+		var(--ec-text-color) 30%,
+		var(--ec-bg-transparent)
+	);
+
+	--ec-text-holiday: oklch(74.841% 0.10792 1.168);
+	--ec-text-holiday-muted: color-mix(
+		in oklch,
+		var(--ec-text-holiday) 30%,
+		var(--ec-bg-transparent)
+	);
+
+	/* --- Accent --- */
+	--ec-accent: oklch(48.889% 0.14378 235.803);
+
+	/* --- Events --- */
+	--ec-event-color-default: oklch(65% 0.08 290);
+
+	/* --- Backgrounds --- */
+	--ec-bg-safe: oklch(32.518% 0.01576 248.37);
+	--ec-bg-weekend: oklab(55.208% 0 -0.00006 / 0.03);
+
+	--ec-bg-accent-today: color-mix(
+		in oklch,
+		var(--ec-accent) 15%,
+		var(--ec-bg-transparent)
+	);
+
+	/* --- Borders --- */
+	--ec-border-color: oklch(51.204% 0.0315 228.361);
+	--ec-border-color-muted: color-mix(
+		in oklch,
+		var(--ec-border-color),
+		var(--ec-bg-transparent)
+	);
+
+	--ec-border: var(--ec-border-color, rgba(140, 140, 140, 0.15)) solid 1px;
+	--ec-border-muted: var(--ec-border-color-muted, rgba(140, 140, 140, 0.02))
+		solid 1px;
+}
+
+.toastui-calendar-weekday {
+	min-height: 70px;
+	height: auto;
+}
+
+.toastui-calendar-panel.toastui-calendar-time {
+	min-height: 150px;
+}
+
+.toastui-calendar-day-names.toastui-calendar-month {
+	padding: 0;
+}
+.toastui-calendar-grid-cell-date
+	.toastui-calendar-weekday-grid-date.toastui-calendar-weekday-grid-date-decorator {
+	margin: 2px;
+}
+/* Hide All Day panel when there are no events */
+.toastui-calendar-panel.toastui-calendar-allday:not(
+		:has(.toastui-calendar-weekday-event)
+	) {
+	display: none;
+}
+.toastui-calendar-panel-title {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 2px;
+	box-sizing: border-box;
+}
+
+.toastui-calendar-template-alldayTitle {
+	font-size: 11px;
+	line-height: 1.1;
+	text-align: center;
+	width: 100%;
+	display: block;
+}
+
+/* navigation */
+.ec-calendar-nav {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	margin-bottom: 15px;
+	flex-wrap: wrap;
+	color: var(--ec-text-color);
+}
+
+.ec-calendar-nav > div {
+	display: flex;
+	gap: 4px;
+}
+
+.ec-calendar-nav button {
+	padding: 4px 16px;
+	cursor: pointer;
+	color: var(--ec-text-color);
+	border: var(--ec-border);
+	background: color-mix(
+		in oklch,
+		var(--ec-bg-safe) 50%,
+		var(--ec-bg-accent-today)
+	);
+	border-radius: var(--ec-btn-border-radius);
+	transition: var(--ec-transition);
+	white-space: nowrap;
+}
+
+.ec-calendar-nav button:hover {
+	transform: scale(1.02);
+}
+
+.ec-calendar-nav button:active {
+	transform: scale(0.98);
+}
+
+.ec-calendar-nav button[data-action="prev"],
+.ec-calendar-nav button[data-action="next"] {
+	padding: 4px 12px;
+	background: var(--ec-bg-safe);
+}
+
+.ec-calendar-current-date {
+	margin-left: 10px;
+	font-weight: 500;
+	white-space: nowrap;
+}
+
+/* more events +N button */
+.toastui-calendar-grid-cell-more-events {
+	display: inline-flex !important;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	/* min-width: 26px;
+	max-width: 26px; */
+	height: 26px;
+	padding: 0;
+	margin: 2px;
+	border: 1px solid var(--ec-accent);
+	border-radius: var(--ec-btn-border-radius);
+	cursor: pointer;
+	transition: var(--ec-transition);
+	overflow: hidden;
+	text-overflow: clip;
+	white-space: nowrap;
+}
+
+.toastui-calendar-grid-cell-more-events:hover {
+	transform: scale(1.1);
+}
+
+/* For larger numbers like +10, +11 etc - adjust width if needed */
+/* .toastui-calendar-grid-cell-more-events {
+	width: 32px;
+	min-width: 32px;
+	max-width: 32px;
+} */
+
+/* month view dot fot today */
+.toastui-calendar-weekday-grid-date.toastui-calendar-weekday-grid-date-decorator {
+	background-color: var(--ec-accent) !important;
+}
+.toastui-calendar-weekday-event-dot + .toastui-calendar-weekday-event-title {
+	color: var(--ec-text-color) !important;
+}
+/* vertical borders not possible in js */
+.toastui-calendar-daygrid-cell + .toastui-calendar-daygrid-cell {
+	border-left: var(--ec-border);
+}
+.toastui-calendar-daygrid-cell {
+	padding: 0;
+}
+
+.toastui-calendar-column:not([style*="border-right: none"]) {
+	border-right: var(--ec-border-muted) !important;
+}
+
+.toastui-calendar-day-view-day-names,
+.toastui-calendar-week-view-day-names {
+	border-bottom: var(--ec-border);
+}
+.toastui-calendar-panel-resizer {
+	border-bottom: var(--ec-border) !important;
+	border-top: var(--ec-border) !important;
+}
+.toastui-calendar-timegrid-hour-rows {
+	border-right: var(--ec-border) !important;
+}
+
+/* see more events */
+.toastui-calendar-see-more-header {
+	background-color: var(--ec-bg-main) !important;
+}
+.toastui-calendar-see-more-header span {
+	color: var(--ec-text-color) !important;
+}
+/* timegrid now indicator */
+.toastui-calendar-template-timegridNowIndicatorLabel {
+	font-weight: 900;
+}
+
+/* ================================== 
+	MOBILE RESPONSIVENESS
+================================== */
+
+@media (max-width: 600px) {
+	.toastui-calendar-weekday {
+		min-height: 54px;
+		height: auto;
+	}
+
+	/* Reduce header padding for more space */
+	.toastui-calendar-week-view .toastui-calendar-day-name-item {
+		/* padding: 0 !important; */
+	}
+
+	/* Week view - vertical day name layout */
+	.toastui-calendar-week-view span[data-testid^="dayName-week"] {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		line-height: 1;
+	}
+
+	.toastui-calendar-week-view
+		span[data-testid^="dayName-week"]
+		.toastui-calendar-day-name__name {
+		font-size: 0.75em;
+		order: -1;
+	}
+
+	.toastui-calendar-week-view
+		span[data-testid^="dayName-week"]
+		.toastui-calendar-day-name__date {
+		font-size: 18px;
+		order: 0;
+	}
+
+	.toastui-calendar-grid-cell-more-events {
+		display: block;
+		position: relative;
+		top: -4px;
+	}
+}
