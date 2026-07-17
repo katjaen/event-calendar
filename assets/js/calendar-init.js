@@ -499,7 +499,7 @@ function getActiveCalendarTheme() {
 	const borderMain = h.getVar("--ec-border");
 	const borderMuted = h.getVar("--ec-border-muted");
 	const ecText = h.getColor("--ec-text-color");
-	const ecTextMuted = h.getColor("--ec-text-color-muted");
+	const ecTextMuted = h.getColor("--ec-text-muted");
 	const ecHoliday = h.getColor("--ec-text-holiday");
 	const ecHolidayMuted = h.getColor("--ec-text-holiday-muted");
 	const ecAccent = h.getColor("--ec-accent");

@@ -9,9 +9,12 @@
 
 	/* --- Texts --- */
 	--ec-text-color: light-dark(oklch(20% 0.01 250), oklch(92% 0.01 250));
-	--ec-text-color-muted: light-dark(
-		color-mix(in oklch, var(--ec-text-color) 30%, var(--ec-bg-transparent)),
-		color-mix(in oklch, var(--ec-text-color) 30%, var(--ec-bg-transparent))
+	--ec-text-muted: var(
+		--text-muted,
+		light-dark(
+			color-mix(in oklch, var(--ec-text-color) 30%, var(--ec-bg-transparent)),
+			color-mix(in oklch, var(--ec-text-color) 30%, var(--ec-bg-transparent))
+		)
 	);
 
 	--ec-text-holiday: light-dark(
@@ -60,10 +63,9 @@
 		oklch(83.934% 0.03108 226.227),
 		oklch(51.204% 0.0315 228.361)
 	);
-	--ec-border-color-muted: color-mix(
-		in oklch,
-		var(--ec-border-color),
-		var(--ec-bg-transparent)
+	--ec-border-color-muted: var(
+		--border-color-muted,
+		color-mix(in oklch, var(--ec-border-color), var(--ec-bg-transparent))
 	);
 
 	--ec-border: var(--ec-border-color, rgba(140, 140, 140, 0.15)) solid 1px;
@@ -71,6 +73,11 @@
 		solid 1px;
 
 	--ec-btn-border-radius: 55px;
+	--ec-btn-padding-block: var(--btn-padding-block, 4px);
+	--ec-btn-padding-inline: var(
+		--btn-padding-inline,
+		calc(var(--ec-btn-padding-block) * 1.5)
+	);
 	--ec-transition: all 0.2s ease;
 
 	/* --- Widths --- */
@@ -88,10 +95,9 @@
 :root.color-scheme--alt {
 	/* --- Texts --- */
 	--ec-text-color: oklch(92% 0.01 250);
-	--ec-text-color-muted: color-mix(
-		in oklch,
-		var(--ec-text-color) 30%,
-		var(--ec-bg-transparent)
+	--ec-text-muted: var(
+		--text-muted,
+		color-mix(in oklch, var(--ec-text-color) 30%, var(--ec-bg-transparent))
 	);
 
 	--ec-text-holiday: oklch(74.841% 0.10792 1.168);
@@ -119,10 +125,9 @@
 
 	/* --- Borders --- */
 	--ec-border-color: oklch(51.204% 0.0315 228.361);
-	--ec-border-color-muted: color-mix(
-		in oklch,
-		var(--ec-border-color),
-		var(--ec-bg-transparent)
+	--ec-border-color-muted: var(
+		--border-color-muted,
+		color-mix(in oklch, var(--ec-border-color), var(--ec-bg-transparent))
 	);
 
 	--ec-border: var(--ec-border-color, rgba(140, 140, 140, 0.15)) solid 1px;
@@ -184,7 +189,7 @@
 }
 
 .ec-calendar-nav button {
-	padding: 4px 16px;
+	padding: var(--ec-btn-padding-block) var(--ec-btn-padding-inline);
 	cursor: pointer;
 	color: var(--ec-text-color);
 	border: var(--ec-border);
