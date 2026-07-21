@@ -1,0 +1,14 @@
+{
+	"name": "event-calendar-tests",
+	"version": "1.0.0",
+	"private": true,
+	"scripts": {
+		"test": "npm run test:js && npm run test:php",
+		"test:js": "jest",
+		"test:php": "php tests/php/test-query-builder.php && php tests/php/test-color-and-settings.php"
+	},
+	"devDependencies": {
+		"jest": "^30.0.0",
+		"jest-environment-jsdom": "^30.0.0"
+	}
+}

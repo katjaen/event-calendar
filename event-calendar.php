@@ -13,6 +13,35 @@
 if (!defined('ABSPATH')) exit;
 
 /* =========================
+    VERSION
+========================= */
+// Single source of truth: read straight from the docblock above, so every
+// wp_enqueue_script/style() call below stays in sync with the "Version:"
+// header just by bumping it there — nothing else to touch.
+define('EC_VERSION', get_file_data(__FILE__, ['Version' => 'Version'])['Version']);
+
+/* =========================
+    PLUGIN ROW LINKS ("Settings" / "Docs" next to Deactivate)
+========================= */
+
+add_filter('plugin_action_links_' . plugin_basename(__FILE__), function (array $links): array {
+    $extra = [
+        'settings' => sprintf(
+            '<a href="%s">%s</a>',
+            esc_url(admin_url('edit.php?post_type=event&page=event-calendar-settings')),
+            esc_html__('Settings', 'event-calendar')
+        ),
+        'docs' => sprintf(
+            '<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
+            esc_url('https://github.com/katjaen/event-calendar#readme'),
+            esc_html__('Docs', 'event-calendar')
+        ),
+    ];
+
+    return array_merge($extra, $links);
+});
+
+/* =========================
     CPT + TAXONOMIES
 ========================= */
 
@@ -67,6 +96,7 @@ add_action('init', function () {
     INCLUDES
 ========================= */
 require_once plugin_dir_path(__FILE__) . 'inc/query-builder.php';
+require_once plugin_dir_path(__FILE__) . 'inc/settings.php';
 
 /* =========================
     COLOR CONFIGURATION
@@ -110,6 +140,12 @@ add_action('init', function () {
 }, 0);
 
 // Register meta fields (Gutenberg + REST API)
+// Priority 20 (not the default 10, and definitely not an earlier one): must
+// run AFTER every custom post type on the site has been registered on
+// 'init', otherwise get_post_types() below won't see them yet and their
+// meta never gets exposed to REST/Gutenberg for that post type — the
+// sidebar UI still renders (its own enqueue isn't gated on this), but
+// anything typed into it silently fails to save.
 add_action('init', function () {
     $post_types = get_post_types(['public' => true], 'names');
     $post_types = array_diff($post_types, ['page', 'attachment']);
@@ -193,7 +229,7 @@ add_action('init', function () {
             },
         ]);
     }
-}, 5);
+}, 20);
 
 /* =========================
     GUTENBERG SIDEBAR
@@ -210,7 +246,7 @@ add_action('enqueue_block_editor_assets', function () {
             'wp-data',
             'wp-element',
         ],
-        '1.0.0',
+        EC_VERSION,
         true
     );
 
@@ -225,11 +261,20 @@ add_action('enqueue_block_editor_assets', function () {
         'startDate'     => __('Start Date', 'event-calendar'),
         'endLabel'      => __('End Date & Time', 'event-calendar'),
         'endDate'       => __('End Date', 'event-calendar'),
+        'endDateHelp'   => __('Must be on or after the start date', 'event-calendar'),
         'locationLabel' => __('Location', 'event-calendar'),
         'colorLabel'    => __('Color', 'event-calendar'),
         'pageNotice'    => __('Events are not available for pages. Use posts or custom post types instead.', 'event-calendar'),
+        'mirroredNotice' => __('This post type already has its own event fields elsewhere on this screen — they get mirrored here automatically. Edit them there instead.', 'event-calendar'),
         'endBeforeStartWarning' => __('End date must be after start date', 'event-calendar'),
     ]);
+
+    // Post types that manage their own event fields and mirror them into
+    // _event_* meta via their own save hook (see e.g. gmina-core/includes/
+    // calendar.php) — for these, showing this sidebar too would just be a
+    // second, disconnected place to type the same thing. Empty by default;
+    // other plugins opt their own post types out via this filter.
+    wp_localize_script('event-calendar-sidebar', 'eventCalendarMirroredPostTypes', apply_filters('ec_mirrored_post_types', []));
 });
 
 /* =========================
@@ -244,8 +289,20 @@ add_action('rest_api_init', function () {
             // --- Check if query_id is provided (used by blocks/shortcodes) ---
             $query_id = $request->get_param('query_id');
             if (!empty($query_id)) {
+                // Only ever look up transients this plugin itself created
+                // (see the 'ec_' . wp_hash(...) below) — without this check
+                // a caller could pass the name of *any* transient on the
+                // site and have its value fed into get_posts().
+                if (strpos($query_id, 'ec_') !== 0) {
+                    return new WP_Error(
+                        'invalid_query',
+                        'Query not found or expired',
+                        ['status' => 404]
+                    );
+                }
+
                 $args = get_transient($query_id);
-                if (!$args) {
+                if (!is_array($args)) {
                     return new WP_Error(
                         'invalid_query',
                         'Query not found or expired',
@@ -286,6 +343,7 @@ add_action('rest_api_init', function () {
                     'description'     => $event->post_content ?: '',
                     'backgroundColor' => $color ?: '#d3c1ef',
                     'borderColor'     => ec_darken_border($color ?: '#d3c1ef'),
+                    'url'             => get_permalink($event),
                 ];
             }
 
@@ -351,7 +409,7 @@ add_action('init', function () {
         // Enqueue scripts and styles
         wp_enqueue_script(
             'tui-calendar',
-            'https://cdn.jsdelivr.net/npm/@toast-ui/calendar@2.1.3/dist/toastui-calendar.min.js',
+            plugin_dir_url(__FILE__) . 'assets/js/toastui-calendar.min.js',
             [],
             '2.1.3',
             true
@@ -366,13 +424,13 @@ add_action('init', function () {
             'event-calendar',
             plugin_dir_url(__FILE__) . 'assets/css/calendar.css',
             ['toastui-calendar'],
-            '0.2.1'
+            EC_VERSION
         );
         wp_enqueue_script(
             'event-calendar-init',
             plugin_dir_url(__FILE__) . 'assets/js/calendar-init.js',
             ['tui-calendar'],
-            '0.2.1',
+            EC_VERSION,
             true
         );
 
@@ -408,6 +466,7 @@ add_action('init', function () {
             'nextLabel' => __('Next', 'event-calendar'),
             'locale' => str_replace('_', '-', get_locale()),
             'startDaySource' => EVENT_CALENDAR_START_DAY_SOURCE,
+            'clickBehavior' => ec_get_click_behavior(),
         ];
 
         wp_add_inline_script(
@@ -445,11 +504,3 @@ add_action('init', function () {
     });
 });
 
-/* =========================
-    ACTIVATION
-========================= */
-
-register_activation_hook(__FILE__, function () {
-    $js_dir = plugin_dir_path(__FILE__) . 'assets/js';
-    if (!file_exists($js_dir)) wp_mkdir_p($js_dir);
-});

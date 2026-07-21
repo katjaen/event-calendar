@@ -5,6 +5,7 @@ const { useSelect, useDispatch } = wp.data;
 const { createElement, Fragment, useState } = wp.element;
 
 const L = window.eventCalendarSidebarLabels || {};
+const MIRRORED_POST_TYPES = window.eventCalendarMirroredPostTypes || [];
 
 // --- Helper Functions (poza komponentem) ---
 
@@ -86,6 +87,23 @@ const EventSidebar = () => {
 				className: "event-calendar-sidebar",
 			},
 			createElement("p", { className: "wp-block-page-notice" }, L.pageNotice),
+		);
+	}
+
+	// --- Post types with their own event fields elsewhere (mirrored in) ---
+	if (MIRRORED_POST_TYPES.includes(postType)) {
+		return createElement(
+			PluginDocumentSettingPanel,
+			{
+				name: "event-calendar-sidebar",
+				title: L.title,
+				className: "event-calendar-sidebar",
+			},
+			createElement(
+				"p",
+				{ className: "wp-block-page-notice" },
+				L.mirroredNotice,
+			),
 		);
 	}
 
@@ -237,3 +255,9 @@ const EventSidebar = () => {
 };
 
 registerPlugin("event-calendar-sidebar", { render: EventSidebar });
+
+// Nieszkodliwe w przeglądarce (tam "module" nie istnieje) — pozwala testom
+// jednostkowym (Jest, patrz tests/) importować czyste funkcje bez bundlera.
+if (typeof module !== "undefined" && module.exports) {
+	module.exports = { toggleAllDay, validateAndFormatDates };
+}

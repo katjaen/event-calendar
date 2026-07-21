@@ -62,8 +62,8 @@ function getStartDayOfWeek(calendarData) {
 		: 1;
 }
 
-// Will be set in DOMContentLoaded when eventCalendarData is available
-// let START_DAY_OF_WEEK = 1;
+// Recalculated in DOMContentLoaded once eventCalendarData is available
+let START_DAY_OF_WEEK = 1;
 
 let DEFAULT_EVENT_COLOR = "rgb(212, 196, 237)";
 
@@ -87,14 +87,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	// ✅ Oblicz START_DAY_OF_WEEK
 	START_DAY_OF_WEEK = getStartDayOfWeek(firstCalendarData);
-
-	// DEBUG: Log configuration
-	console.log("📅 Event Calendar Config:", {
-		startOfWeekFromWP: firstCalendarData.startOfWeek,
-		calculatedStartDay: START_DAY_OF_WEEK,
-		dayNamesShort: firstCalendarData.dayNamesShort,
-		locale: firstCalendarData.locale,
-	});
 
 	const helpers = getCSSHelpers();
 	DEFAULT_EVENT_COLOR =
@@ -157,6 +149,7 @@ function createCalendar(calendarEl) {
 			getCalendarConfig(calendarView, calendarId),
 		);
 		loadEvents(calendar, calendarId);
+		initEventClickBehavior(calendar, calendarId);
 		calendarEl._tuiCalendar = calendar;
 		scheduleCalendarRender(calendarId);
 	} catch (error) {
@@ -165,6 +158,26 @@ function createCalendar(calendarEl) {
 			error,
 		);
 	}
+}
+
+/* =========================
+	CLICK BEHAVIOR
+========================= */
+// Ustawienie z panelu Event Calendar → Settings (event-calendar.php,
+// ec_get_click_behavior()). "link" to jedyny obecnie zaimplementowany
+// tryb — kolejne (np. "popup") dogrywają tu swój case, bez zmiany
+// niczego innego w tym pliku.
+function initEventClickBehavior(calendar, calendarId) {
+	calendar.on("clickEvent", ({ event }) => {
+		const calendarData =
+			window.eventCalendarData?.[calendarId] || window.eventCalendarData || {};
+		const behavior = calendarData.clickBehavior || "link";
+		const url = event.raw?.url;
+
+		if (behavior === "link" && url) {
+			window.location.href = url;
+		}
+	});
 }
 
 /* =========================
@@ -298,7 +311,6 @@ async function loadEvents(calendar, calendarId) {
 		const events = await response.json();
 
 		if (!events?.length) {
-			console.log(`No events found for calendar ${calendarId}`);
 			return;
 		}
 
@@ -342,6 +354,9 @@ function mapEventToToast(event) {
 			body: event.description || "",
 			backgroundColor,
 			borderColor,
+			// Dane własne, niezużywane przez samo ToastUI — tylko do odczytu w
+			// naszym handlerze "clickEvent" (patrz initEventClickBehavior()).
+			raw: { url: event.url || "" },
 		};
 	} catch (error) {
 		console.error("Error mapping event:", event?.id, error);
@@ -713,4 +728,15 @@ function initThemeObserver() {
 		observer.disconnect();
 		clearTimeout(debounceTimer);
 	});
+}
+
+// Nieszkodliwe w przeglądarce (tam "module" nie istnieje) — pozwala testom
+// jednostkowym (Jest, patrz tests/) importować czyste funkcje bez bundlera.
+if (typeof module !== "undefined" && module.exports) {
+	module.exports = {
+		formatTimeLabelCentral,
+		mapEventToToast,
+		normalizeView,
+		getStartDayOfWeek,
+	};
 }

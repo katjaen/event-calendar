@@ -26,7 +26,7 @@ Prosty plugin WordPress do tworzenia i wyświetlania wydarzeń. Obsługuje włas
 
 - WordPress 6.0+
 - PHP 7.4+
-- TUI Calendar 2.1.3 (ładowany automatycznie z CDN przy użyciu shortcode/bloku)
+- TUI Calendar 2.1.3 (dołączony do pluginu w `assets/`, bez zależności od CDN)
 
 ---
 
@@ -44,7 +44,8 @@ Prosty plugin WordPress do tworzenia i wyświetlania wydarzeń. Obsługuje włas
 event-calendar/
 ├── event-calendar.php          # Główny plik pluginu (CPT, meta, REST API, shortcode)
 ├── inc/
-│   └── query-builder.php       # Wspólna logika budowania zapytań WP_Query
+│   ├── query-builder.php       # Wspólna logika budowania zapytań WP_Query
+│   └── settings.php            # Strona ustawień (Wydarzenia → Settings)
 ├── blocks/
 │   └── calendar/
 │       ├── block.json          # Definicja bloku Gutenberg
@@ -57,7 +58,17 @@ event-calendar/
 │   │   └── toastui-calendar.min.css
 │   └── js/
 │       ├── calendar-init.js    # Inicjalizacja TUI Calendar, nawigacja, motywy
-│       └── gutenberg-event-sidebar.js  # Panel boczny edytora
+│       ├── gutenberg-event-sidebar.js  # Panel boczny edytora
+│       └── toastui-calendar.min.js     # Biblioteka TUI Calendar (dołączona lokalnie)
+├── tests/
+│   ├── calendar-init.pure.test.js
+│   ├── gutenberg-event-sidebar.date-logic.test.js
+│   └── php/
+│       ├── bootstrap.php
+│       ├── test-query-builder.php
+│       └── test-color-and-settings.php
+├── jest.config.js
+├── package.json
 └── languages/
     ├── event-calendar.pot
     ├── event-calendar-pl_PL.po
@@ -89,6 +100,16 @@ Pola są przechowywane jako post meta:
 | `_event_all_day`  | `"0"` / `"1"` | Czy całodniowe                                         |
 | `_event_location` | string        | Lokalizacja                                            |
 | `_event_color`    | hex string    | Kolor (domyślnie `#d3c1ef`)                            |
+
+---
+
+## Ustawienia
+
+W menu **Wydarzenia → Settings** (oraz w linku "Settings" przy pluginie na liście wtyczek) dostępna jest strona ustawień:
+
+| Opcja            | Opis                                                                 |
+| ---------------- | --------------------------------------------------------------------- |
+| On event click   | Zachowanie po kliknięciu wydarzenia w kalendarzu (obecnie: `link` — przejście do wpisu) |
 
 ---
 
@@ -218,6 +239,17 @@ Aby wygenerować nowy plik `.pot`:
 
 ```bash
 wp i18n make-pot . languages/event-calendar.pot
+```
+
+---
+
+## Testy
+
+```bash
+npm install
+npm test          # uruchamia testy JS (Jest) i PHP
+npm run test:js   # tylko testy JS (jest.config.js, środowisko jsdom)
+npm run test:php  # tylko testy PHP (uruchamiane bezpośrednio, bez PHPUnit)
 ```
 
 ---

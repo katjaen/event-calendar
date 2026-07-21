@@ -24,7 +24,7 @@ add_action('enqueue_block_editor_assets', function () {
 			'wp-data',
 			'wp-i18n'
 		],
-		'1.0.0',
+		EC_VERSION,
 		true
 	);
 
