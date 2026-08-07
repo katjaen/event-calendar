@@ -9,14 +9,14 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-02-11T09:55:34+00:00\n"
+"POT-Creation-Date: 2026-08-07T18:30:40+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: event-calendar\n"
 
 #. Plugin Name of the plugin
 #: event-calendar.php
-#: blocks/calendar/index.php:52
+#: blocks/calendar/index.php:51
 msgid "Event Calendar"
 msgstr ""
 
@@ -31,6 +31,7 @@ msgid "Katarzyna Niklas"
 msgstr ""
 
 #: blocks/calendar/index.php:33
+#: inc/settings.php:26
 msgid "Calendar Settings"
 msgstr ""
 
@@ -87,103 +88,154 @@ msgid "Enter term IDs or slugs, comma-separated"
 msgstr ""
 
 #: blocks/calendar/index.php:47
-msgid "Available terms: "
-msgstr ""
-
-#: blocks/calendar/index.php:48
 msgid "Operator"
 msgstr ""
 
-#: blocks/calendar/index.php:49
+#: blocks/calendar/index.php:48
 msgid "IN (any of)"
 msgstr ""
 
-#: blocks/calendar/index.php:50
+#: blocks/calendar/index.php:49
 msgid "AND (all of)"
 msgstr ""
 
-#: blocks/calendar/index.php:51
+#: blocks/calendar/index.php:50
 msgid "NOT IN (none of)"
 msgstr ""
 
-#: blocks/calendar/index.php:53
-#, php-format
-msgid "%d term selected"
+#: event-calendar.php:32
+#: inc/settings.php:27
+msgid "Settings"
 msgstr ""
 
-#: blocks/calendar/index.php:54
-#, php-format
-msgid "%d terms selected"
+#: event-calendar.php:37
+msgid "Docs"
 msgstr ""
 
-#: event-calendar.php:168
+#: event-calendar.php:52
+msgid "Events"
+msgstr ""
+
+#: event-calendar.php:53
+msgid "Event"
+msgstr ""
+
+#: event-calendar.php:54
+msgid "Add New Event"
+msgstr ""
+
+#: event-calendar.php:55
+msgid "Edit Event"
+msgstr ""
+
+#: event-calendar.php:56
+msgid "All Events"
+msgstr ""
+
+#: event-calendar.php:57
+msgid "No events found."
+msgstr ""
+
+#: event-calendar.php:75
+msgid "Event Categories"
+msgstr ""
+
+#: event-calendar.php:85
+msgid "Event Locations"
+msgstr ""
+
+#: event-calendar.php:255
 msgid "Event Details"
 msgstr ""
 
-#: event-calendar.php:169
+#: event-calendar.php:256
 msgid "Include in Calendar?"
 msgstr ""
 
-#: event-calendar.php:170
+#: event-calendar.php:257
 msgid "Check to include this post in the calendar"
 msgstr ""
 
-#: event-calendar.php:171
-#: event-calendar.php:344
+#: event-calendar.php:258
+#: event-calendar.php:463
 msgid "All day"
 msgstr ""
 
-#: event-calendar.php:172
+#: event-calendar.php:259
 msgid "This event lasts all day"
 msgstr ""
 
-#: event-calendar.php:173
+#: event-calendar.php:260
 msgid "Start Date & Time"
 msgstr ""
 
-#: event-calendar.php:174
+#: event-calendar.php:261
 msgid "Start Date"
 msgstr ""
 
-#: event-calendar.php:175
+#: event-calendar.php:262
 msgid "End Date & Time"
 msgstr ""
 
-#: event-calendar.php:176
+#: event-calendar.php:263
 msgid "End Date"
 msgstr ""
 
-#: event-calendar.php:177
+#: event-calendar.php:264
+msgid "Must be on or after the start date"
+msgstr ""
+
+#: event-calendar.php:265
 msgid "Location"
 msgstr ""
 
-#: event-calendar.php:178
+#: event-calendar.php:266
 msgid "Color"
 msgstr ""
 
-#: event-calendar.php:179
+#: event-calendar.php:267
 msgid "Events are not available for pages. Use posts or custom post types instead."
 msgstr ""
 
-#: event-calendar.php:180
+#: event-calendar.php:268
+msgid "This post type already has its own event fields elsewhere on this screen — they get mirrored here automatically. Edit them there instead."
+msgstr ""
+
+#: event-calendar.php:269
 msgid "End date must be after start date"
 msgstr ""
 
-#: event-calendar.php:219
+#: event-calendar.php:338
 msgid "Untitled"
 msgstr ""
 
-#: event-calendar.php:345
-#: event-calendar.php:374
+#: event-calendar.php:464
+#: event-calendar.php:494
 msgid "Today"
 msgstr ""
 
-#: event-calendar.php:346
+#: event-calendar.php:465
 msgid "Previous"
 msgstr ""
 
-#: event-calendar.php:347
+#: event-calendar.php:466
 msgid "Next"
+msgstr ""
+
+#: inc/settings.php:45
+msgid "Behavior"
+msgstr ""
+
+#: inc/settings.php:52
+msgid "On event click"
+msgstr ""
+
+#: inc/settings.php:65
+msgid "Go to the event's post"
+msgstr ""
+
+#: inc/settings.php:75
+msgid "Event Calendar Settings"
 msgstr ""
 
 #: blocks/calendar/editor.js:138

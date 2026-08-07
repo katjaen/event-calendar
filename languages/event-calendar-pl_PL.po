@@ -1,34 +1,28 @@
-# Event Calendar Plugin Translation
-# Copyright (C) 2026 Katarzyna Niklas
 msgid ""
 msgstr ""
 "Project-Id-Version: Event Calendar 0.1.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/event-calendar\n"
-"POT-Creation-Date: 2026-02-11T09:55:34+00:00\n"
-"PO-Revision-Date: 2026-02-11 10:57+0100\n"
 "Last-Translator: Katarzyna Niklas <email@example.com>\n"
 "Language-Team: Polish\n"
-"Language: pl_PL\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
-"|| n%100>=20) ? 1 : 2);\n"
+"POT-Creation-Date: 2026-02-11T09:55:34+00:00\n"
+"PO-Revision-Date: 2026-02-11 10:57+0100\n"
+"Language: pl_PL\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Generator: Poedit 3.8\n"
 
 #. Plugin Name of the plugin
-#: event-calendar.php blocks/calendar/index.php:52
+#: event-calendar.php
+#: blocks/calendar/index.php:51
 msgid "Event Calendar"
 msgstr "Kalendarz zdarzeń"
 
 #. Description of the plugin
 #: event-calendar.php
-msgid ""
-"Simple WordPress plugin to create and display events with custom CPT and "
-"meta fields"
-msgstr ""
-"Prosta wtyczka WordPress do tworzenia i wyświetlania zdarzeń z "
-"niestandardowymi polami CPT i meta"
+msgid "Simple WordPress plugin to create and display events with custom CPT and meta fields"
+msgstr "Prosta wtyczka WordPress do tworzenia i wyświetlania zdarzeń z niestandardowymi polami CPT i meta"
 
 #. Author of the plugin
 #: event-calendar.php
@@ -36,6 +30,7 @@ msgid "Katarzyna Niklas"
 msgstr "Katarzyna Niklas"
 
 #: blocks/calendar/index.php:33
+#: inc/settings.php:26
 msgid "Calendar Settings"
 msgstr "Ustawienia kalendarza"
 
@@ -92,112 +87,98 @@ msgid "Enter term IDs or slugs, comma-separated"
 msgstr "Wprowadź ID lub slugi terminów, rozdzielone przecinkami"
 
 #: blocks/calendar/index.php:47
-msgid "Available terms: "
-msgstr "Dostępne terminy: "
-
-#: blocks/calendar/index.php:48
 msgid "Operator"
 msgstr "Operator"
 
-#: blocks/calendar/index.php:49
+#: blocks/calendar/index.php:48
 msgid "IN (any of)"
 msgstr "W (dowolnej z)"
 
-#: blocks/calendar/index.php:50
+#: blocks/calendar/index.php:49
 msgid "AND (all of)"
 msgstr "I (każdej z)"
 
-#: blocks/calendar/index.php:51
+#: blocks/calendar/index.php:50
 msgid "NOT IN (none of)"
 msgstr "Nie w (żadnej z)"
 
-#: blocks/calendar/index.php:53
-#, php-format
-msgid "%d term selected"
-msgstr "%d wybrany termin"
-
-#: blocks/calendar/index.php:54
-#, php-format
-msgid "%d terms selected"
-msgstr "%d wybrane terminy"
-
-#: event-calendar.php:168
+#: event-calendar.php:255
 msgid "Event Details"
 msgstr "Szczegóły zdarzenia"
 
-#: event-calendar.php:169
+#: event-calendar.php:256
 msgid "Include in Calendar?"
 msgstr "Wyświetlać w kalendarzu?"
 
-#: event-calendar.php:170
+#: event-calendar.php:257
 msgid "Check to include this post in the calendar"
 msgstr "Zaznacz by wyświetlać ten post w kalendarzu"
 
-#: event-calendar.php:171 event-calendar.php:344
+#: event-calendar.php:258
+#: event-calendar.php:463
 msgid "All day"
 msgstr "Cały dzień"
 
-#: event-calendar.php:172
+#: event-calendar.php:259
 msgid "This event lasts all day"
 msgstr "To zdarzenie trwa cały dzień"
 
-#: event-calendar.php:173
+#: event-calendar.php:260
 msgid "Start Date & Time"
 msgstr "Data i czas rozpoczęcia"
 
-#: event-calendar.php:174
+#: event-calendar.php:261
 msgid "Start Date"
 msgstr "Data rozpoczęcia"
 
-#: event-calendar.php:175
+#: event-calendar.php:262
 msgid "End Date & Time"
 msgstr "Data i czas zakończenia"
 
-#: event-calendar.php:176
+#: event-calendar.php:263
 msgid "End Date"
 msgstr "Data zakończenia"
 
-#: event-calendar.php:177
+#: event-calendar.php:265
 msgid "Location"
 msgstr "Lokalizacja"
 
-#: event-calendar.php:178
+#: event-calendar.php:266
 msgid "Color"
 msgstr "Kolor"
 
-#: event-calendar.php:179
-msgid ""
-"Events are not available for pages. Use posts or custom post types instead."
-msgstr ""
-"Wydarzenia nie są dostępne dla stron. Zamiast tego użyj wpisów lub "
-"niestandardowych typów wpisów."
+#: event-calendar.php:267
+msgid "Events are not available for pages. Use posts or custom post types instead."
+msgstr "Wydarzenia nie są dostępne dla stron. Zamiast tego użyj wpisów lub niestandardowych typów wpisów."
 
-#: event-calendar.php:180
+#: event-calendar.php:269
 msgid "End date must be after start date"
 msgstr "Data zakończenia musi być późniejsza niż rozpoczęcia"
 
-#: event-calendar.php:219
+#: event-calendar.php:338
 msgid "Untitled"
 msgstr "Bez tytułu"
 
-#: event-calendar.php:345 event-calendar.php:374
+#: event-calendar.php:464
+#: event-calendar.php:494
 msgid "Today"
 msgstr "Dziś"
 
-#: event-calendar.php:346
+#: event-calendar.php:465
 msgid "Previous"
 msgstr "Poprzedni"
 
-#: event-calendar.php:347
+#: event-calendar.php:466
 msgid "Next"
 msgstr "Następny"
 
 #: blocks/calendar/editor.js:138
+#, js-format
 msgid "✓ %d term selected"
 msgid_plural "✓ %d terms selected"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "✓ wybrano %d termin"
+msgstr[1] "✓ wybrano %d terminy"
+msgstr[2] "✓ wybrano %d terminów"
 
 #: blocks/calendar/editor.js:179
 msgid "Clear all"
@@ -228,26 +209,67 @@ msgctxt "block keyword"
 msgid "schedule"
 msgstr "siatka"
 
-#~ msgid "Select terms"
-#~ msgstr "Wybierz terminy"
+#: event-calendar.php:32
+#: inc/settings.php:27
+msgid "Settings"
+msgstr "Ustawienia"
 
-#~ msgid "Add New Event"
-#~ msgstr "Dodaj nowe zdarzenie"
+#: event-calendar.php:37
+msgid "Docs"
+msgstr "Dokumentacja"
 
-#~ msgid "Edit Event"
-#~ msgstr "Edytuj zdarzenie"
+#: event-calendar.php:52
+msgid "Events"
+msgstr "Wydarzenia"
 
-#~ msgid "New Event"
-#~ msgstr "Nowe zdarzenie"
+#: event-calendar.php:53
+msgid "Event"
+msgstr "Wydarzenie"
 
-#~ msgid "View Event"
-#~ msgstr "Zobacz zdarzenie"
+#: event-calendar.php:54
+msgid "Add New Event"
+msgstr "Dodaj nowe wydarzenie"
 
-#~ msgid "Search Events"
-#~ msgstr "Szukaj zdarzenia"
+#: event-calendar.php:55
+msgid "Edit Event"
+msgstr "Edytuj wydarzenie"
 
-#~ msgid "No events found"
-#~ msgstr "Nie znaleziono zdarzenia"
+#: event-calendar.php:56
+msgid "All Events"
+msgstr "Wszystkie wydarzenia"
 
-#~ msgid "No events found in trash"
-#~ msgstr "Nie znaleziono zdarzenia w koszu"
+#: event-calendar.php:57
+msgid "No events found."
+msgstr "Nie znaleziono wydarzeń."
+
+#: event-calendar.php:75
+msgid "Event Categories"
+msgstr "Kategorie wydarzeń"
+
+#: event-calendar.php:85
+msgid "Event Locations"
+msgstr "Lokalizacje wydarzeń"
+
+#: event-calendar.php:264
+msgid "Must be on or after the start date"
+msgstr "Musi przypadać w dniu rozpoczęcia lub później"
+
+#: event-calendar.php:268
+msgid "This post type already has its own event fields elsewhere on this screen — they get mirrored here automatically. Edit them there instead."
+msgstr "Ten typ treści ma już własne pola zdarzenia w innym miejscu tego ekranu — są tu automatycznie lustrzone. Edytuj je tam."
+
+#: inc/settings.php:45
+msgid "Behavior"
+msgstr "Zachowanie"
+
+#: inc/settings.php:52
+msgid "On event click"
+msgstr "Po kliknięciu wydarzenia"
+
+#: inc/settings.php:65
+msgid "Go to the event's post"
+msgstr "Przejdź do wpisu wydarzenia"
+
+#: inc/settings.php:75
+msgid "Event Calendar Settings"
+msgstr "Ustawienia kalendarza zdarzeń"

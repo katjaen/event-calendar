@@ -5,7 +5,7 @@
 	"scripts": {
 		"test": "npm run test:js && npm run test:php",
 		"test:js": "jest",
-		"test:php": "php tests/php/test-query-builder.php && php tests/php/test-color-and-settings.php"
+		"test:php": "php tests/php/test-query-builder.php && php tests/php/test-color-and-settings.php && php tests/php/test-i18n-completeness.php"
 	},
 	"devDependencies": {
 		"jest": "^30.0.0",

@@ -66,7 +66,8 @@ event-calendar/
 │   └── php/
 │       ├── bootstrap.php
 │       ├── test-query-builder.php
-│       └── test-color-and-settings.php
+│       ├── test-color-and-settings.php
+│       └── test-i18n-completeness.php
 ├── jest.config.js
 ├── package.json
 └── languages/
@@ -168,7 +169,8 @@ Opcjonalny parametr `query_id` (generowany automatycznie przez shortcode/blok) o
 		"location": "Kraków",
 		"description": "Opis...",
 		"backgroundColor": "#ddc7ff",
-		"borderColor": "#b39fd9"
+		"borderColor": "#b39fd9",
+		"url": "https://example.com/event/nazwa-wydarzenia/"
 	}
 ]
 ```
@@ -234,12 +236,29 @@ Opcjonalny przełącznik:
 ## Internacjonalizacja
 
 Tłumaczenia ładowane z folderu `languages/`. Text domain: `event-calendar`.
+WordPress czyta wyłącznie skompilowany `.mo` — `.po` to plik roboczy (Poedit
+i podobne), `.pot` to sam szablon (bez tłumaczeń).
 
-Aby wygenerować nowy plik `.pot`:
+**Po dodaniu/zmianie dowolnego `__()`/`_e()` w kodzie** trzeba przejść cały
+łańcuch, inaczej nowy string zostaje po angielsku mimo załadowanego `pl_PL`
+(dokładnie to się stało do 2026-08-07 — patrz Changelog):
 
 ```bash
-wp i18n make-pot . languages/event-calendar.pot
+# 1. Przelicz .pot ze źródeł (nowe/zmienione stringi)
+wp i18n make-pot . languages/event-calendar.pot --domain=event-calendar --slug=event-calendar
+
+# 2. Zmerguj .pot do .po — zachowuje istniejące tłumaczenia, dopisuje nowe jako puste
+wp i18n update-po languages/event-calendar.pot languages/event-calendar-pl_PL.po
+
+# 3. Uzupełnij puste msgstr w .po (ręcznie albo w Poedit)
+
+# 4. Przelicz .mo — BEZ TEGO KROKU WordPress nadal serwuje stare tłumaczenia
+wp i18n make-mo languages/event-calendar-pl_PL.po languages/
 ```
+
+`tests/php/test-i18n-completeness.php` pilnuje kroków 3–4 automatycznie —
+failuje, jeśli w `.po` zostanie puste `msgstr`, albo jeśli `.mo` jest starszy
+niż `.po` (czyli krok 4 pominięty).
 
 ---
 
@@ -255,6 +274,12 @@ npm run test:php  # tylko testy PHP (uruchamiane bezpośrednio, bez PHPUnit)
 ---
 
 ## Changelog
+
+### Unreleased
+
+- Uzupełnione tłumaczenie `pl_PL` — `.po` był rozjechany z kodem (etykiety CPT „Events"/„Event"/„Settings"/„Docs" i kilka innych stringów panelu Ustawień nigdy nie trafiły do tłumaczenia, mimo że w interfejsie widać było angielski tekst); `.mo` przeliczony
+- Dodany `tests/php/test-i18n-completeness.php` — regresja pilnująca, żeby `.po` nie miał pustych tłumaczeń i żeby `.mo` nie był starszy niż `.po`
+- Rozbudowana sekcja „Internacjonalizacja" w README o pełny workflow `make-pot` → `update-po` → `make-mo`
 
 ### 0.2.1
 
