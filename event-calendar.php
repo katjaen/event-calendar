@@ -270,7 +270,7 @@ add_action('enqueue_block_editor_assets', function () {
     ]);
 
     // Post types that manage their own event fields and mirror them into
-    // _event_* meta via their own save hook (see e.g. gmina-core/includes/
+    // _event_* meta via their own save hook (see e.g. core-gmina/includes/
     // calendar.php) — for these, showing this sidebar too would just be a
     // second, disconnected place to type the same thing. Empty by default;
     // other plugins opt their own post types out via this filter.
