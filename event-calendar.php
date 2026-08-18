@@ -2,8 +2,8 @@
 
 /**
  * Plugin Name: Event Calendar
- * Description: Simple WordPress plugin to create and display events with custom CPT and meta fields
- * Version: 0.2.1
+ * Description: Lightweight, flexible WordPress plugin to create and display events — custom CPT, meta fields, Gutenberg block, shortcode, REST API
+ * Version: 1.0.0
  * Author: Katarzyna Niklas
  * Text Domain: event-calendar
  * Domain Path: /languages
@@ -480,19 +480,45 @@ add_action('init', function () {
             'before'
         );
 
+        // Normalize the initial view the same way calendar-init.js does
+        // (normalizeView()) so the view-switcher's active button always
+        // matches whatever TUI Calendar actually renders.
+        $initial_view = in_array($atts['view'], ['day', 'week', 'month'], true)
+            ? $atts['view']
+            : 'month';
+
+        $view_labels = [
+            'day' => esc_html__('Day', 'event-calendar'),
+            'week' => esc_html__('Week', 'event-calendar'),
+            'month' => esc_html__('Month', 'event-calendar'),
+        ];
+
+        $view_buttons = '';
+        foreach ($view_labels as $view_key => $view_label) {
+            $view_buttons .= sprintf(
+                '<button type="button" data-action="view" data-view="%1$s" class="%2$s" aria-pressed="%3$s">%4$s</button>',
+                esc_attr($view_key),
+                $view_key === $initial_view ? 'is-active' : '',
+                $view_key === $initial_view ? 'true' : 'false',
+                $view_label
+            );
+        }
+
         // Navigation HTML
         $navigation = sprintf(
-            '<div class="ec-calendar-nav" data-calendar-target="%d">
-                <button data-action="today">%s</button>
+            '<div class="ec-calendar-nav" data-calendar-target="%1$d">
+                <button data-action="today">%2$s</button>
                 <div style="display: flex; gap: 4px;">
                     <button data-action="prev">‹</button>
                     <button data-action="next">›</button>
                 </div>
-                <span class="ec-calendar-current-date" data-calendar-id="%d"></span>
+                <span class="ec-calendar-current-date" data-calendar-id="%1$d"></span>
+                <div class="ec-calendar-view-switch" role="group" aria-label="%3$s">%4$s</div>
             </div>',
             $calendar_count,
             esc_html__('Today', 'event-calendar'),
-            $calendar_count
+            esc_attr__('View', 'event-calendar'),
+            $view_buttons
         );
 
         // Calendar container

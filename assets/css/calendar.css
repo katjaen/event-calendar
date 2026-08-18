@@ -27,9 +27,9 @@
 	);
 
 	/* --- Accent --- */
-	--ec-accent: light-dark(
-		oklch(68.278% 0.14378 235.803),
-		oklch(48.889% 0.14378 235.803)
+	--ec-accent: var(
+		--accent,
+		light-dark(oklch(68.278% 0.14378 235.803), oklch(48.889% 0.14378 235.803))
 	);
 
 	/* --- Events --- */
@@ -72,12 +72,16 @@
 	--ec-border-muted: var(--ec-border-color-muted, rgba(140, 140, 140, 0.02))
 		solid 1px;
 
-	--ec-btn-border-radius: 55px;
+	--ec-btn-border-radius: var(--btn-radius, 50px);
 	--ec-btn-padding-block: var(--btn-padding-block, 4px);
 	--ec-btn-padding-inline: var(
 		--btn-padding-inline,
 		calc(var(--ec-btn-padding-block) * 1.5)
 	);
+	/* Deliberately smaller than --ec-btn-padding-block: the site-wide button
+	   padding reads as too tall for these compact nav controls (arrows,
+	   view switch). */
+	--ec-nav-btn-padding-block: 3px;
 	--ec-transition: all 0.2s ease;
 
 	/* --- Widths --- */
@@ -189,7 +193,8 @@
 }
 
 .ec-calendar-nav button {
-	padding: var(--ec-btn-padding-block) var(--ec-btn-padding-inline);
+	appearance: none;
+	padding: var(--ec-nav-btn-padding-block) var(--ec-btn-padding-inline);
 	cursor: pointer;
 	color: var(--ec-text-color);
 	border: var(--ec-border);
@@ -211,16 +216,44 @@
 	transform: scale(0.98);
 }
 
+/* Arrows: fixed square regardless of glyph/font metrics — width drives the
+   box, aspect-ratio keeps it square even if flex context nudges one axis. */
 .ec-calendar-nav button[data-action="prev"],
 .ec-calendar-nav button[data-action="next"] {
-	padding: 4px 12px;
-	background: var(--ec-bg-safe);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: 1.9em;
+	aspect-ratio: 1 / 1;
+	padding: 0;
+	background: transparent;
 }
 
 .ec-calendar-current-date {
 	margin-left: 10px;
 	font-weight: 500;
 	white-space: nowrap;
+}
+
+/* Day/Week/Month side by side: only the active view gets the same tinted
+   fill as the "Today" button, the other two stay outline-only. */
+.ec-calendar-view-switch {
+	display: flex;
+	gap: 4px;
+	margin-left: auto;
+}
+
+.ec-calendar-nav button[data-action="view"] {
+	background: transparent;
+}
+
+.ec-calendar-nav button[data-action="view"].is-active {
+	background: color-mix(
+		in oklch,
+		var(--ec-bg-safe) 50%,
+		var(--ec-bg-accent-today)
+	);
 }
 
 /* more events +N button */

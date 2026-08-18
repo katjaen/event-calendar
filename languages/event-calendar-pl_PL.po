@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Event Calendar 0.1.1\n"
+"Project-Id-Version: Event Calendar 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/event-calendar\n"
 "Last-Translator: Katarzyna Niklas <email@example.com>\n"
 "Language-Team: Polish\n"
@@ -19,11 +19,6 @@ msgstr ""
 msgid "Event Calendar"
 msgstr "Kalendarz zdarzeń"
 
-#. Description of the plugin
-#: event-calendar.php
-msgid "Simple WordPress plugin to create and display events with custom CPT and meta fields"
-msgstr "Prosta wtyczka WordPress do tworzenia i wyświetlania zdarzeń z niestandardowymi polami CPT i meta"
-
 #. Author of the plugin
 #: event-calendar.php
 msgid "Katarzyna Niklas"
@@ -35,18 +30,22 @@ msgid "Calendar Settings"
 msgstr "Ustawienia kalendarza"
 
 #: blocks/calendar/index.php:34
+#: event-calendar.php:520
 msgid "View"
 msgstr "Widok"
 
 #: blocks/calendar/index.php:35
+#: event-calendar.php:493
 msgid "Month"
 msgstr "Miesiąc"
 
 #: blocks/calendar/index.php:36
+#: event-calendar.php:492
 msgid "Week"
 msgstr "Tydzień"
 
 #: blocks/calendar/index.php:37
+#: event-calendar.php:491
 msgid "Day"
 msgstr "Dzień"
 
@@ -160,7 +159,7 @@ msgid "Untitled"
 msgstr "Bez tytułu"
 
 #: event-calendar.php:464
-#: event-calendar.php:494
+#: event-calendar.php:519
 msgid "Today"
 msgstr "Dziś"
 
@@ -273,3 +272,8 @@ msgstr "Przejdź do wpisu wydarzenia"
 #: inc/settings.php:75
 msgid "Event Calendar Settings"
 msgstr "Ustawienia kalendarza zdarzeń"
+
+#. Description of the plugin
+#: event-calendar.php
+msgid "Lightweight, flexible WordPress plugin to create and display events — custom CPT, meta fields, Gutenberg block, shortcode, REST API"
+msgstr "Lekka, elastyczna wtyczka WordPress do tworzenia i wyświetlania wydarzeń — własny CPT, pola meta, blok Gutenberga, shortcode, REST API"

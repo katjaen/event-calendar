@@ -151,6 +151,7 @@ function createCalendar(calendarEl) {
 		loadEvents(calendar, calendarId);
 		initEventClickBehavior(calendar, calendarId);
 		calendarEl._tuiCalendar = calendar;
+		setActiveViewButton(calendarId, calendarView);
 		scheduleCalendarRender(calendarId);
 	} catch (error) {
 		console.error(
@@ -395,9 +396,32 @@ function initGlobalNavigation() {
 			case "today":
 				calendar.today();
 				break;
+			case "view": {
+				const newView = normalizeView(button.dataset.view);
+				calendar.changeView(newView);
+				calendarEl.dataset.calendarView = newView;
+				setActiveViewButton(targetId, newView);
+				break;
+			}
 		}
 
 		scheduleCalendarRender(targetId);
+	});
+}
+
+/* =========================
+	VIEW SWITCH BUTTONS
+========================= */
+function setActiveViewButton(calendarId, view) {
+	const nav = document.querySelector(
+		`.ec-calendar-nav[data-calendar-target="${calendarId}"]`,
+	);
+	if (!nav) return;
+
+	nav.querySelectorAll('button[data-action="view"]').forEach(btn => {
+		const isActive = btn.dataset.view === view;
+		btn.classList.toggle("is-active", isActive);
+		btn.setAttribute("aria-pressed", isActive ? "true" : "false");
 	});
 }
 

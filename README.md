@@ -1,11 +1,39 @@
 # Event Calendar
 
-Prosty plugin WordPress do tworzenia i wyświetlania wydarzeń. Obsługuje własny typ wpisu (CPT), pola meta, blok Gutenberga, shortcode oraz REST API.
+Lekki, elastyczny plugin WordPress do tworzenia i wyświetlania wydarzeń. Obsługuje własny typ wpisu (CPT), pola meta, blok Gutenberga, shortcode oraz REST API.
 
-**Wersja:** 0.2.1  
+**Wersja:** 1.0.0  
 **Autor:** Katarzyna Niklas  
 **Licencja:** GPL-2.0+  
 **Text Domain:** `event-calendar`
+
+---
+
+## Spis treści
+
+1. [Funkcje](#funkcje)
+2. [Wymagania](#wymagania)
+3. [Instalacja](#instalacja)
+4. [Struktura katalogów](#struktura-katalogów)
+5. [Oznaczanie wpisów jako wydarzenie](#oznaczanie-wpisów-jako-wydarzenie)
+6. [Ustawienia](#ustawienia)
+7. [Wyświetlanie kalendarza](#wyświetlanie-kalendarza)
+   - [Blok Gutenberg](#blok-gutenberg)
+   - [Shortcode](#shortcode)
+8. [REST API](#rest-api)
+   - [Endpoint](#endpoint)
+   - [Przykład odpowiedzi](#przykład-odpowiedzi)
+9. [Zakres dat](#zakres-dat)
+10. [Konfiguracja kolorów](#konfiguracja-kolorów)
+11. [Obsługa trybu ciemnego](#obsługa-trybu-ciemnego)
+12. [Internacjonalizacja](#internacjonalizacja)
+13. [Testy](#testy)
+14. [Changelog](#changelog)
+    - [Unreleased](#unreleased)
+    - [1.0.0](#100)
+    - [0.2.1](#021)
+    - [0.2.0](#020)
+    - [0.1.0](#010)
 
 ---
 
@@ -277,6 +305,9 @@ npm run test:php  # tylko testy PHP (uruchamiane bezpośrednio, bez PHPUnit)
 
 ### Unreleased
 
+### 1.0.0
+
+- Wersja oznaczona jako stabilna (SemVer 1.0.0) — plugin jest w produkcyjnym użyciu, zakres funkcji (CPT, meta, blok Gutenberga, shortcode, REST API, i18n) uznany za domknięty; opis pluginu zmieniony z "Prosty" na "Lekki, elastyczny" (poprzednie słowo zaniżało realny zakres funkcji)
 - Uzupełnione tłumaczenie `pl_PL` — `.po` był rozjechany z kodem (etykiety CPT „Events"/„Event"/„Settings"/„Docs" i kilka innych stringów panelu Ustawień nigdy nie trafiły do tłumaczenia, mimo że w interfejsie widać było angielski tekst); `.mo` przeliczony
 - Dodany `tests/php/test-i18n-completeness.php` — regresja pilnująca, żeby `.po` nie miał pustych tłumaczeń i żeby `.mo` nie był starszy niż `.po`
 - Rozbudowana sekcja „Internacjonalizacja" w README o pełny workflow `make-pot` → `update-po` → `make-mo`
