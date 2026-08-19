@@ -44,7 +44,7 @@ Lekki, elastyczny plugin WordPress do tworzenia i wyświetlania wydarzeń. Obsł
 - Blok `event-calendar/calendar` z konfiguracją widoku i filtrów
 - Shortcode `[event_calendar]`
 - REST API: `GET /wp-json/event-calendar/v1/events`
-- Obsługa widoków: miesięczny, tygodniowy, dzienny (TUI Calendar 2.x)
+- Obsługa widoków: miesięczny, tygodniowy, dzienny (TUI Calendar 2.x) — atrybut `view` ustala widok POCZĄTKOWY, plus przełącznik Dzień/Tydzień/Miesiąc w nawigacji kalendarza, żeby odwiedzający mógł zmienić widok na żywo bez przeładowania
 - Wsparcie dla trybu ciemnego (light-dark CSS) i alternatywnych schematów kolorów (ACSS)
 - Internacjonalizacja (i18n), gotowa wersja `pl_PL`
 
@@ -308,6 +308,7 @@ npm run test:php  # tylko testy PHP (uruchamiane bezpośrednio, bez PHPUnit)
 ### 1.0.0
 
 - Wersja oznaczona jako stabilna (SemVer 1.0.0) — plugin jest w produkcyjnym użyciu, zakres funkcji (CPT, meta, blok Gutenberga, shortcode, REST API, i18n) uznany za domknięty; opis pluginu zmieniony z "Prosty" na "Lekki, elastyczny" (poprzednie słowo zaniżało realny zakres funkcji)
+- Dodany przełącznik widoku Dzień/Tydzień/Miesiąc w nawigacji kalendarza (`data-action="view"`) — atrybut `view` w shortcode/bloku dalej ustala tylko widok początkowy, teraz można go zmienić bez przeładowania strony; aktywny przycisk dostaje tę samą stonowaną wypełnioną etykietę co przycisk „Dziś"
 - Uzupełnione tłumaczenie `pl_PL` — `.po` był rozjechany z kodem (etykiety CPT „Events"/„Event"/„Settings"/„Docs" i kilka innych stringów panelu Ustawień nigdy nie trafiły do tłumaczenia, mimo że w interfejsie widać było angielski tekst); `.mo` przeliczony
 - Dodany `tests/php/test-i18n-completeness.php` — regresja pilnująca, żeby `.po` nie miał pustych tłumaczeń i żeby `.mo` nie był starszy niż `.po`
 - Rozbudowana sekcja „Internacjonalizacja" w README o pełny workflow `make-pot` → `update-po` → `make-mo`
