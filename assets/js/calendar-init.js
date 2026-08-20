@@ -723,6 +723,40 @@ function updateAllCalendarThemes() {
 }
 
 /* =========================
+    POPUP POSITION FIX
+========================= */
+// ToastUI liczy top/left tego popupu tak, jakby jego containing block
+// (najbliższy pozycjonowany przodek) zaczynał się dokładnie w punkcie
+// (0,0) strony — funkcja es() w toastui-calendar.min.js liczy pozycję
+// względem viewportu, po czym RĘCZNIE dodaje window.scrollY/scrollX,
+// zakładając że to da poprawną wartość dla position:absolute. To założenie
+// jest fałszywe, gdy popup renderuje się wewnątrz JAKIEGOKOLWIEK
+// pozycjonowanego przodka, który sam nie zaczyna się w (0,0) strony — a w
+// WordPressie/Bricksie taki przodek prawie zawsze istnieje (np. kontener
+// sekcji ma position:relative niezależnie od nas). Efekt: popup ląduje o
+// pozycję tego przodka za daleko — im dalej w dół strony jest kalendarz,
+// tym gorzej.
+//
+// Poprawka: odejmujemy od top/left TUI realną pozycję strony rzeczywistego
+// containing blocka (popup.offsetParent — cokolwiek nim akurat jest, nie
+// zakładamy konkretnego elementu), więc działa niezależnie od tego, gdzie
+// dokładnie w drzewie DOM wyląduje najbliższy position:relative/absolute.
+function fixSeeMorePopupPosition(popup) {
+	const containingBlock = popup.offsetParent;
+	if (!containingBlock) return;
+
+	const cbRect = containingBlock.getBoundingClientRect();
+	const cbPageTop = cbRect.top + window.scrollY;
+	const cbPageLeft = cbRect.left + window.scrollX;
+
+	const currentTop = parseFloat(popup.style.top) || 0;
+	const currentLeft = parseFloat(popup.style.left) || 0;
+
+	popup.style.top = `${currentTop - cbPageTop}px`;
+	popup.style.left = `${currentLeft - cbPageLeft}px`;
+}
+
+/* =========================
     POPUP OBSERVER
 ========================= */
 function observePopups() {
@@ -741,6 +775,13 @@ function observePopups() {
 				const popupNode = isPopup ? node : popupInside;
 
 				if (popupNode) {
+					// Synchronicznie, nie w requestAnimationFrame: czyta i
+					// pisze tylko style inline + getBoundingClientRect(),
+					// oba dostępne od razu po wstawieniu węzła — czekanie
+					// na klatkę renderowania nie jest tu do niczego
+					// potrzebne, tylko dokłada niepewny timing.
+					fixSeeMorePopupPosition(popupNode);
+
 					requestAnimationFrame(() => {
 						replaceDayNames();
 						makeEventsFocusable(popupNode);

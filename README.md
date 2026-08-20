@@ -407,16 +407,34 @@ drugie wymagałoby pozycjonowanego przodka, żeby po `:focus` wylądować przy
 kalendarzu zamiast gdzieś w strukturze strony (dokładnie ten sam bug co
 przy popupie „+N więcej", patrz niżej).
 
-**Popup „+N więcej" — naprawiony (2026-08-20).** Był to realny, osobny
-mechanizm od `useDetailPopup` (który faktycznie jest wyłączony i dotyczy
-tylko kliku w pojedyncze wydarzenie) — popup przepełnienia dnia
-(`.toastui-calendar-see-more-container`) renderuje się przez ToastUI zawsze,
-niezależnie od tej flagi. Przyczyna złego pozycjonowania: `.ec-calendar` nie
-miało `position` ustawionego, więc `.toastui-calendar-floating-layer` (siostra
-`.toastui-calendar-layout`, nie jej dziecko) szukało najbliższego
-pozycjonowanego przodka poza kalendarzem — stąd popup lądował gdzieś w
-strukturze strony zamiast przy siatce. Fix: `position: relative` na
-`.ec-calendar` ([assets/css/calendar.css](assets/css/calendar.css)).
+**Popup „+N więcej" — naprawiony (2026-08-20, poprawiony ponownie
+2026-08-20).** Był to realny, osobny mechanizm od `useDetailPopup` (który
+faktycznie jest wyłączony i dotyczy tylko kliku w pojedyncze wydarzenie) —
+popup przepełnienia dnia (`.toastui-calendar-see-more-container`) renderuje
+się przez ToastUI zawsze, niezależnie od tej flagi.
+
+Pierwsza poprawka (`position: relative` na `.ec-calendar`, bo
+`.toastui-calendar-floating-layer` jest siostrą `.toastui-calendar-layout`,
+nie jej dzieckiem, więc szukała najbliższego pozycjonowanego przodka poza
+kalendarzem) była niekompletna — naprawiła tylko *który* przodek staje się
+containing blockiem, nie samą przyczynę. Prawdziwe źródło: funkcja `es()` w
+`toastui-calendar.min.js` liczy pozycję popupu względem viewportu, po czym
+**ręcznie dodaje `window.scrollY`/`scrollX`**, zakładając że containing
+block popupu zaczyna się dokładnie w punkcie (0,0) strony — założenie
+fałszywe dla dowolnego pozycjonowanego przodka, który sam nie jest w (0,0)
+(a w Bricksie kontener sekcji ma `position: relative` niezależnie od nas).
+Im dalej w dół strony jest kalendarz, tym bardziej popup ląduje "poza
+body". Naprawione w [calendar-init.js](assets/js/calendar-init.js) —
+`fixSeeMorePopupPosition()`, odpalane przez `observePopups()` po każdym
+pojawieniu się popupu — odejmuje od top/left TUI realną pozycję strony
+`popup.offsetParent` (rzeczywistego containing blocka, czymkolwiek akurat
+jest), więc działa niezależnie od struktury strony. Uwaga:
+`requestAnimationFrame` w tej konkretnej poprawce jest celowo pominięty
+(wywołanie synchroniczne w callbacku `MutationObserver`) — sprawdzone
+środowisko testowe pokazało, że samo czytanie/pisanie stylów inline +
+`getBoundingClientRect()` nie potrzebuje czekać na klatkę renderowania, a
+w niektórych kontekstach (headless/zdalnie sterowana przeglądarka) rAF
+może się nie odpalić wcale.
 
 ---
 
