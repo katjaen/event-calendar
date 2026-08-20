@@ -55,7 +55,7 @@ function add_filter(string $tag, callable $cb, int $priority = 10, int $accepted
 /**
  * apply_filters() jest realny (odpala callbacki zarejestrowane przez
  * add_filter powyżej) — dzięki temu np. `ec_events_per_page` oraz
- * `ec_event_months_back` / `ec_event_months_ahead` da się przetestować
+ * `ec_event_days_back` / `ec_event_days_ahead` da się przetestować
  * tak samo jak w prawdziwym WP (patrz test-query-builder.php).
  */
 function apply_filters(string $tag, $value, ...$args)

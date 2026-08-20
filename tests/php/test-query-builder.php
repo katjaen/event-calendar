@@ -74,25 +74,25 @@ assert_equal('1', $args['meta_query'][0]['value'], 'pierwszy warunek: wartość 
 assert_true(in_array('event', $args['post_type'], true), 'domyślnie zapytanie obejmuje "event"');
 assert_true(!isset($args['tax_query']), 'bez taxonomy_queries w configu -> brak tax_query w ogóle');
 
-ec_test_section('ec_build_events_query() — zakres dat liczony z ec_event_months_back / ec_event_months_ahead');
+ec_test_section('ec_build_events_query() — zakres dat liczony z ec_event_days_back / ec_event_days_ahead');
 
 ec_test_reset_state();
 ec_test_fire('init');
 // apply_filters() jest odczytywane wewnątrz ec_build_events_query() (call
 // time), więc add_filter() rejestrowany tu, przed wywołaniem, faktycznie
 // nadpisuje domyślną wartość — tak samo jak zrobiłby to theme'owy functions.php.
-add_filter('ec_event_months_back', fn() => 1);
-add_filter('ec_event_months_ahead', fn() => 1);
+add_filter('ec_event_days_back', fn() => 14);
+add_filter('ec_event_days_ahead', fn() => 14);
 $args2 = ec_build_events_query([]);
-$expectedStart = date('Y-m-01', strtotime('-1 months'));
-$expectedEnd   = date('Y-m-t', strtotime('+1 months'));
-assert_equal($expectedEnd, $args2['meta_query'][2]['value'], 'granica "w przód": _event_start <= koniec miesiąca za 1 miesiąc');
+$expectedStart = date('Y-m-d', strtotime('-14 days'));
+$expectedEnd   = date('Y-m-d', strtotime('+14 days'));
+assert_equal($expectedEnd, $args2['meta_query'][2]['value'], 'granica "w przód": _event_start <= 14 dni od dziś');
 assert_equal('_event_start', $args2['meta_query'][2]['key'], 'granica "w przód" nadal liczona po _event_start');
 
 $backGroup = $args2['meta_query'][3];
 assert_equal('OR', $backGroup['relation'], 'granica "wstecz" to grupa OR: _event_end (z danymi) albo fallback na _event_start');
 assert_equal('_event_end', $backGroup[0][1]['key'], 'gałąź 1: sprawdza _event_end...');
-assert_equal($expectedStart, $backGroup[0][1]['value'], '...względem początku miesiąca sprzed 1 miesiąca');
+assert_equal($expectedStart, $backGroup[0][1]['value'], '...względem 14 dni wstecz od dziś');
 assert_equal('_event_start', $backGroup[1][1]['key'], 'gałąź 2 (fallback, gdy brak/pusty _event_end): sprawdza _event_start...');
 assert_equal($expectedStart, $backGroup[1][1]['value'], '...względem tego samego progu');
 
@@ -100,7 +100,7 @@ ec_test_section('ec_build_events_query() — zakres dat: _event_end nadpisuje _e
 
 ec_test_reset_state();
 ec_test_fire('init');
-add_filter('ec_event_months_back', fn() => 1);
+add_filter('ec_event_days_back', fn() => 14);
 $args2b = ec_build_events_query([]);
 $endBranch = $args2b['meta_query'][3][0];
 assert_equal('!=', $endBranch[0]['compare'], 'gałąź z realnym _event_end najpierw odrzuca pusty string...');

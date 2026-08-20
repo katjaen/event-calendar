@@ -8,19 +8,25 @@
 if (!defined('ABSPATH')) exit;
 
 /**
- * Domyśle granice zakresu dat kalendarza (ile miesięcy wstecz/w przód od
- * dziś wciągamy wydarzenia). Dwa sposoby nadpisania:
+ * Domyślne granice zakresu dat kalendarza, w dniach, wstecz/w przód od
+ * dziś. Dni, nie miesiące: precyzyjne okno zamiast zaokrąglania do granic
+ * kalendarzowego miesiąca (dawne "2 miesiące" w praktyce dawały gdzieś
+ * między ~2 a ~3 miesiącami zasięgu, zależnie od dnia miesiąca, w którym
+ * strona akurat się renderowała). Tygodnie to po prostu wielokrotność 7 —
+ * add_filter('ec_event_days_back', fn() => 3 * 7) za dwadzieścia jeden dni.
+ *
+ * Dwa sposoby nadpisania:
  *
  *  1) Filtr w motywie/child-theme (przeżywa aktualizacje wtyczki):
- *     add_filter('ec_event_months_back', fn() => 1);
- *     add_filter('ec_event_months_ahead', fn() => 3);
+ *     add_filter('ec_event_days_back', fn() => 14);   // 2 tygodnie wstecz
+ *     add_filter('ec_event_days_ahead', fn() => 90);  // ~3 miesiące do przodu
  *
  *  2) Zmiana stałych poniżej wprost w tym pliku — szybsze przy jednorazowym
  *     dostosowaniu, ale aktualizacja wtyczki nadpisze plik i przywróci
  *     wartości domyślne.
  */
-define('EC_DEFAULT_MONTHS_BACK', 2);
-define('EC_DEFAULT_MONTHS_AHEAD', 2);
+define('EC_DEFAULT_DAYS_BACK', 60);
+define('EC_DEFAULT_DAYS_AHEAD', 60);
 
 /**
  * Build WP_Query arguments for events
@@ -35,13 +41,13 @@ define('EC_DEFAULT_MONTHS_AHEAD', 2);
  */
 function ec_build_events_query($config = [])
 {
-    // How many months to display back and ahead. Resolved here (call time,
+    // How many days to display back and ahead. Resolved here (call time,
     // i.e. during shortcode/REST render) rather than at file-include time —
     // add_filter() calls in a theme's functions.php run after plugins are
     // loaded, so evaluating apply_filters() at the top of this file would
     // run before any override had a chance to register.
-    $ec_months_back  = apply_filters('ec_event_months_back', EC_DEFAULT_MONTHS_BACK);
-    $ec_months_ahead = apply_filters('ec_event_months_ahead', EC_DEFAULT_MONTHS_AHEAD);
+    $ec_days_back  = apply_filters('ec_event_days_back', EC_DEFAULT_DAYS_BACK);
+    $ec_days_ahead = apply_filters('ec_event_days_ahead', EC_DEFAULT_DAYS_AHEAD);
 
     $defaults = [
         'post_type' => '',
@@ -52,8 +58,8 @@ function ec_build_events_query($config = [])
     $config = wp_parse_args($config, $defaults);
 
     // Determine start and end dates for query
-    $start_date = date('Y-m-01', strtotime("-$ec_months_back months"));
-    $end_date   = date('Y-m-t', strtotime("+$ec_months_ahead months"));
+    $start_date = date('Y-m-d', strtotime("-$ec_days_back days"));
+    $end_date   = date('Y-m-d', strtotime("+$ec_days_ahead days"));
 
     // Determine post types
     $post_types = ec_parse_post_types($config['post_type']);

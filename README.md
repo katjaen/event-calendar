@@ -209,35 +209,33 @@ Nagłówek cache: `Cache-Control: public, max-age=300` (5 minut).
 
 ## Zakres dat
 
-Domyślnie kalendarz pobiera wydarzenia z zakresu ±2 miesiące od teraz —
-stałe `EC_DEFAULT_MONTHS_BACK` / `EC_DEFAULT_MONTHS_AHEAD` na początku
-[inc/query-builder.php](inc/query-builder.php). Granica "wstecz" liczy się
-od **`_event_end`** (daty zakończenia), nie startu — dzięki temu wydarzenie
-wielodniowe, które zaczęło się dawno, ale skończyło niedawno, nie znika z
-kalendarza przedwcześnie. Gdy `_event_end` jest puste/nieustawione (typowe
-dla wydarzeń jednodniowych — sidebar Gutenberga zapisuje wtedy pusty string,
-patrz `gutenberg-event-sidebar.js`), automatyczny fallback na `_event_start`.
-Granica "w przód" nadal liczy się od `_event_start` (kiedy wydarzenie się
-zaczyna).
+Domyślnie kalendarz pobiera wydarzenia z zakresu ±60 dni od teraz — stałe
+`EC_DEFAULT_DAYS_BACK` / `EC_DEFAULT_DAYS_AHEAD` na początku
+[inc/query-builder.php](inc/query-builder.php). Jednostka to dni: precyzyjne
+rolling window zamiast zaokrąglania do granic kalendarzowego miesiąca.
+Granica "wstecz" liczy się od **`_event_end`** (daty zakończenia), nie
+startu — dzięki temu wydarzenie wielodniowe, które zaczęło się dawno, ale
+skończyło niedawno, nie znika z kalendarza przedwcześnie. Gdy `_event_end`
+jest puste/nieustawione (typowe dla wydarzeń jednodniowych — sidebar
+Gutenberga zapisuje wtedy pusty string, patrz `gutenberg-event-sidebar.js`),
+automatyczny fallback na `_event_start`. Granica "w przód" nadal liczy się
+od `_event_start` (kiedy wydarzenie się zaczyna).
 
 Dwa sposoby nadpisania:
 
 ```php
 // 1) Filtr w motywie/child-theme — zalecane, przeżywa aktualizacje wtyczki.
-add_filter('ec_event_months_back',  fn() => 6);  // 6 miesięcy wstecz
-add_filter('ec_event_months_ahead', fn() => 3);  // 3 miesiące do przodu
+add_filter('ec_event_days_back',  fn() => 14);      // 2 tygodnie wstecz
+add_filter('ec_event_days_ahead', fn() => 3 * 30);  // ~3 miesiące do przodu
 ```
 
 ```php
 // 2) Zmiana stałych wprost w inc/query-builder.php — szybsze przy
 //    jednorazowym dostosowaniu, ale aktualizacja wtyczki nadpisze plik
 //    i przywróci wartości domyślne.
-define('EC_DEFAULT_MONTHS_BACK', 6);
-define('EC_DEFAULT_MONTHS_AHEAD', 3);
+define('EC_DEFAULT_DAYS_BACK', 14);
+define('EC_DEFAULT_DAYS_AHEAD', 90);
 ```
-
-Granulacja to pełne miesiące (`strtotime("-$X months")`) — nie da się tu
-bezpośrednio wyrazić np. "tydzień wstecz"; potrzebny byłby osobny mechanizm.
 
 Limit wpisów na zapytanie (domyślnie 500):
 
