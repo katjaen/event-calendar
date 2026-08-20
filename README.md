@@ -25,10 +25,11 @@ Lekki, elastyczny plugin WordPress do tworzenia i wyświetlania wydarzeń. Obsł
    - [Przykład odpowiedzi](#przykład-odpowiedzi)
 9. [Zakres dat](#zakres-dat)
 10. [Konfiguracja kolorów](#konfiguracja-kolorów)
-11. [Obsługa trybu ciemnego](#obsługa-trybu-ciemnego)
-12. [Internacjonalizacja](#internacjonalizacja)
-13. [Testy](#testy)
-14. [Changelog](#changelog)
+11. [Rozmiary siatki](#rozmiary-siatki)
+12. [Obsługa trybu ciemnego](#obsługa-trybu-ciemnego)
+13. [Internacjonalizacja](#internacjonalizacja)
+14. [Testy](#testy)
+15. [Changelog](#changelog)
     - [Unreleased](#unreleased)
     - [1.0.0](#100)
     - [0.2.1](#021)
@@ -267,6 +268,36 @@ define('EC_BORDER_DARKEN_BOOST', 20); // procent przyciemnienia
 ```php
 define('EVENT_CALENDAR_START_DAY_SOURCE', 'wp'); // 'wp' lub 'locale'
 ```
+
+---
+
+## Rozmiary siatki
+
+ToastUI nie ma opcji "wysokość komórki w px" — mierzy realną wysokość
+kontenera (`.ec-calendar`) i dzieli ją przez liczbę wierszy/godzin. Dwie
+zmienne CSS w [assets/css/calendar.css](assets/css/calendar.css) sterują tą
+wysokością kontenera tak, żeby po podzieleniu wyszła żądana wartość:
+
+```css
+:root {
+	--ec-month-cell-height: 110px; /* wysokość wiersza tygodnia, widok miesiąca */
+	--ec-hour-height: 48px;        /* wysokość bloku godzinowego, widok dzień/tydzień */
+}
+```
+
+**Miesiąc — dokładne.** Nagłówek dni jest w bibliotece na sztywno 31px,
+a `isAlways6Weeks` (nienadpisywane w `getCalendarConfig()`, domyślnie `true`
+w ToastUI) oznacza zawsze dokładnie 6 wierszy — `31px + --ec-month-cell-height × 6`.
+
+**Dzień/tydzień — przybliżone.** Nagłówek dni to również sztywne 42px
+(`42px + --ec-hour-height × (--ec-hour-end − --ec-hour-start)` —
+`--ec-hour-start`/`--ec-hour-end` to osobne, już wcześniej istniejące
+zmienne sterujące widocznym zakresem godzin, domyślnie 6–24), ale między
+nim a siatką godzin jest jeszcze panel wydarzeń całodniowych, który rośnie z
+liczbą takich wydarzeń widocznych w danym tygodniu. Przy pustym/domyślnym
+panelu wynik jest dokładny; z widocznymi wydarzeniami całodniowymi siatka
+godzin (a więc realna wysokość bloku) skurczy się o tyle, o ile urósł ten
+panel.
 
 ---
 

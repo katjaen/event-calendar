@@ -90,6 +90,21 @@
 
 	--ec-hour-start: 6;
 	--ec-hour-end: 24;
+
+	/* --- Row/cell height ---
+	   ToastUI nie ma opcji "wysokość komórki w px" — mierzy realną wysokość
+	   kontenera i dzieli ją przez liczbę wierszy/godzin. Więc sterujemy
+	   wysokością KONTENERA tak, żeby po podzieleniu wyszła żądana wartość.
+	   Miesiąc: dokładne (nagłówek dni w bibliotece to sztywne 31px,
+	   isAlways6Weeks u nas nienadpisywane -> zawsze 6 wierszy).
+	   Dzień/tydzień: przybliżone — 42px to nagłówek dni (też sztywne w
+	   bibliotece), ale między nim a siatką godzin jest jeszcze panel
+	   wydarzeń całodniowych, który rośnie z liczbą takich wydarzeń w danym
+	   tygodniu; przy pustym/domyślnym panelu wynik jest dokładny, przy
+	   widocznych wydarzeniach całodniowych siatka godzin (a więc i
+	   --ec-hour-height) skurczy się o tyle, o ile urósł ten panel. */
+	--ec-month-cell-height: 110px;
+	--ec-hour-height: 48px;
 }
 
 /* ==================================
@@ -179,6 +194,23 @@
 
 .ec-calendar {
 	position: relative;
+}
+
+/* Wysokość kontenera per widok — patrz komentarz przy --ec-month-cell-height
+   / --ec-hour-height w :root. data-calendar-view jest trzymane w zgodzie z
+   aktualnym widokiem TUI przez initGlobalNavigation() (calendar-init.js),
+   które po zmianie widoku odpala calendar.render(), żeby biblioteka od razu
+   przemierzyła kontener na nowo (jej własny resize-observer łapie tylko
+   window "resize", nie zmianę wysokości z CSS). */
+.ec-calendar[data-calendar-view="month"] {
+	height: calc(31px + var(--ec-month-cell-height) * 6);
+}
+
+.ec-calendar[data-calendar-view="week"],
+.ec-calendar[data-calendar-view="day"] {
+	height: calc(
+		42px + var(--ec-hour-height) * (var(--ec-hour-end) - var(--ec-hour-start))
+	);
 }
 
 /* Skip link — pozwala pominąć siatkę wydarzeń (dziesiątki tab-stopów w
@@ -409,5 +441,24 @@
 		display: block;
 		position: relative;
 		top: -4px;
+	}
+
+	/* Popup "+N more" (dzień z za dużą liczbą wydarzeń) — TUI Calendar
+	   liczy top/left inline (JS), względem .ec-calendar (offsetParent),
+	   nie względem viewportu. Sprawdzone na żywo 2026-08-19 na mobile:
+	   top potrafi wyjść >1000px poza widoczny obszar (dużo poniżej
+	   kalendarza, bo licznik nie uwzględnia poprawnie scrolla strony),
+	   left ujemny (poza lewą krawędzią) — popup realnie niewidoczny bez
+	   przewinięcia. position:fixed + wyśrodkowanie w viewporcie omija
+	   to całkowicie, niezależnie od pozycji scrolla. !important
+	   konieczne — inline style (JS) normalnie biłoby zwykłą regułę. */
+	.toastui-calendar-see-more-container {
+		position: fixed !important;
+		top: 50% !important;
+		left: 50% !important;
+		transform: translate(-50%, -50%) !important;
+		z-index: 1000 !important;
+		max-width: 90vw;
+		max-height: 80vh;
 	}
 }

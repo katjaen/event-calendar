@@ -451,7 +451,13 @@ function initGlobalNavigation() {
 			case "view": {
 				const newView = normalizeView(button.dataset.view);
 				calendar.changeView(newView);
+				// Zmiana atrybutu przełącza, która reguła CSS ustawia
+				// wysokość .ec-calendar (patrz calendar.css) — TUI mierzy
+				// wysokość kontenera własnym resize-observerem, który łapie
+				// tylko window "resize", nie samą zmianę CSS, więc
+				// wymuszamy ponowny pomiar/layout wprost.
 				calendarEl.dataset.calendarView = newView;
+				calendar.render();
 				setActiveViewButton(targetId, newView);
 				break;
 			}
