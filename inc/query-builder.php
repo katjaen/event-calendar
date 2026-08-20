@@ -8,6 +8,21 @@
 if (!defined('ABSPATH')) exit;
 
 /**
+ * Domyśle granice zakresu dat kalendarza (ile miesięcy wstecz/w przód od
+ * dziś wciągamy wydarzenia). Dwa sposoby nadpisania:
+ *
+ *  1) Filtr w motywie/child-theme (przeżywa aktualizacje wtyczki):
+ *     add_filter('ec_event_months_back', fn() => 1);
+ *     add_filter('ec_event_months_ahead', fn() => 3);
+ *
+ *  2) Zmiana stałych poniżej wprost w tym pliku — szybsze przy jednorazowym
+ *     dostosowaniu, ale aktualizacja wtyczki nadpisze plik i przywróci
+ *     wartości domyślne.
+ */
+define('EC_DEFAULT_MONTHS_BACK', 2);
+define('EC_DEFAULT_MONTHS_AHEAD', 2);
+
+/**
  * Build WP_Query arguments for events
  * 
  * @param array $config {
@@ -25,8 +40,8 @@ function ec_build_events_query($config = [])
     // add_filter() calls in a theme's functions.php run after plugins are
     // loaded, so evaluating apply_filters() at the top of this file would
     // run before any override had a chance to register.
-    $ec_months_back  = apply_filters('ec_event_months_back', 2);
-    $ec_months_ahead = apply_filters('ec_event_months_ahead', 2);
+    $ec_months_back  = apply_filters('ec_event_months_back', EC_DEFAULT_MONTHS_BACK);
+    $ec_months_ahead = apply_filters('ec_event_months_ahead', EC_DEFAULT_MONTHS_AHEAD);
 
     $defaults = [
         'post_type' => '',
@@ -59,18 +74,57 @@ function ec_build_events_query($config = [])
                 'key'     => '_event_start',
                 'compare' => 'EXISTS'
             ],
-            [
-                'key'     => '_event_start',
-                'value'   => $start_date,
-                'compare' => '>=',
-                'type'    => 'DATETIME'
-            ],
+            // Granica "w przód": kiedy wydarzenie się zaczyna.
             [
                 'key'     => '_event_start',
                 'value'   => $end_date,
                 'compare' => '<=',
                 'type'    => 'DATETIME'
-            ]
+            ],
+            // Granica "wstecz": liczona od _event_end (żeby wielodniowe
+            // wydarzenie, które zaczęło się dawno, ale skończyło niedawno,
+            // nie znikało z kalendarza) — z fallbackiem na _event_start,
+            // gdy _event_end jest puste/nieustawione (typowe dla wydarzeń
+            // jednodniowych; sidebar Gutenberga zapisuje wtedy pusty string,
+            // patrz gutenberg-event-sidebar.js).
+            [
+                'relation' => 'OR',
+                [
+                    'relation' => 'AND',
+                    [
+                        'key'     => '_event_end',
+                        'value'   => '',
+                        'compare' => '!=',
+                    ],
+                    [
+                        'key'     => '_event_end',
+                        'value'   => $start_date,
+                        'compare' => '>=',
+                        'type'    => 'DATETIME',
+                    ],
+                ],
+                [
+                    'relation' => 'AND',
+                    [
+                        'relation' => 'OR',
+                        [
+                            'key'     => '_event_end',
+                            'compare' => 'NOT EXISTS',
+                        ],
+                        [
+                            'key'     => '_event_end',
+                            'value'   => '',
+                            'compare' => '=',
+                        ],
+                    ],
+                    [
+                        'key'     => '_event_start',
+                        'value'   => $start_date,
+                        'compare' => '>=',
+                        'type'    => 'DATETIME',
+                    ],
+                ],
+            ],
         ],
         'orderby'  => 'meta_value',
         'meta_key' => '_event_start',

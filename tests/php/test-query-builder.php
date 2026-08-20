@@ -86,8 +86,28 @@ add_filter('ec_event_months_ahead', fn() => 1);
 $args2 = ec_build_events_query([]);
 $expectedStart = date('Y-m-01', strtotime('-1 months'));
 $expectedEnd   = date('Y-m-t', strtotime('+1 months'));
-assert_equal($expectedStart, $args2['meta_query'][2]['value'], 'start_date = początek miesiąca sprzed 1 miesiąca');
-assert_equal($expectedEnd, $args2['meta_query'][3]['value'], 'end_date = koniec miesiąca za 1 miesiąc');
+assert_equal($expectedEnd, $args2['meta_query'][2]['value'], 'granica "w przód": _event_start <= koniec miesiąca za 1 miesiąc');
+assert_equal('_event_start', $args2['meta_query'][2]['key'], 'granica "w przód" nadal liczona po _event_start');
+
+$backGroup = $args2['meta_query'][3];
+assert_equal('OR', $backGroup['relation'], 'granica "wstecz" to grupa OR: _event_end (z danymi) albo fallback na _event_start');
+assert_equal('_event_end', $backGroup[0][1]['key'], 'gałąź 1: sprawdza _event_end...');
+assert_equal($expectedStart, $backGroup[0][1]['value'], '...względem początku miesiąca sprzed 1 miesiąca');
+assert_equal('_event_start', $backGroup[1][1]['key'], 'gałąź 2 (fallback, gdy brak/pusty _event_end): sprawdza _event_start...');
+assert_equal($expectedStart, $backGroup[1][1]['value'], '...względem tego samego progu');
+
+ec_test_section('ec_build_events_query() — zakres dat: _event_end nadpisuje _event_start jako granica "wstecz"');
+
+ec_test_reset_state();
+ec_test_fire('init');
+add_filter('ec_event_months_back', fn() => 1);
+$args2b = ec_build_events_query([]);
+$endBranch = $args2b['meta_query'][3][0];
+assert_equal('!=', $endBranch[0]['compare'], 'gałąź z realnym _event_end najpierw odrzuca pusty string...');
+assert_equal('', $endBranch[0]['value'], '...czyli wydarzenia jednodniowe bez daty końcowej trafiają do fallbacku, nie tutaj');
+$fallbackBranch = $args2b['meta_query'][3][1];
+assert_equal('NOT EXISTS', $fallbackBranch[0][0]['compare'], 'fallback: brak _event_end w ogóle...');
+assert_equal('=', $fallbackBranch[0][1]['compare'], '...lub _event_end zapisane jako pusty string (tak robi sidebar Gutenberga)');
 
 ec_test_section('ec_build_events_query() — taxonomy_queries + tax_relation trafiają do tax_query');
 
