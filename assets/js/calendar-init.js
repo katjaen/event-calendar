@@ -170,14 +170,66 @@ function createCalendar(calendarEl) {
 // niczego innego w tym pliku.
 function initEventClickBehavior(calendar, calendarId) {
 	calendar.on("clickEvent", ({ event }) => {
-		const calendarData =
-			window.eventCalendarData?.[calendarId] || window.eventCalendarData || {};
-		const behavior = calendarData.clickBehavior || "link";
-		const url = event.raw?.url;
+		activateEvent(event, calendarId);
+	});
+}
 
-		if (behavior === "link" && url) {
-			window.location.href = url;
-		}
+// Współdzielone przez klik myszą (clickEvent powyżej) i klawiaturę
+// (makeEventsFocusable() niżej) — jedno miejsce decydujące co się dzieje
+// po "aktywowaniu" wydarzenia, niezależnie od urządzenia wejściowego.
+function activateEvent(event, calendarId) {
+	const calendarData =
+		window.eventCalendarData?.[calendarId] || window.eventCalendarData || {};
+	const behavior = calendarData.clickBehavior || "link";
+	const url = event.raw?.url;
+
+	if (behavior === "link" && url) {
+		window.location.href = url;
+	}
+}
+
+/* =========================
+	KEYBOARD ACCESS TO EVENTS
+========================= */
+// TUI Calendar renderuje wydarzenia jako zwykłe <div>y bez tabindex/role —
+// jego własne wykrywanie kliknięcia to system gestów przeciągania
+// (onMouseUp po naciśnięciu bez ruchu), nie natywny listener "click", więc
+// symulowanie el.click() by tu nie zadziałało. Zamiast tego: same łatamy
+// tabindex/klawiaturę, a po Enter/Spacji odnajdujemy wydarzenie przez
+// data-event-id/data-calendar-id — te same atrybuty, których TUI używa
+// wewnętrznie w calendar.getElement() — i puszczamy je przez ten sam
+// activateEvent() co klik myszą.
+function makeEventsFocusable(root) {
+	if (!root) return;
+
+	const chips = root.querySelectorAll("[data-event-id][data-calendar-id]");
+
+	chips.forEach(chip => {
+		if (chip.dataset.ecFocusable) return;
+		chip.dataset.ecFocusable = "1";
+
+		chip.tabIndex = 0;
+		chip.setAttribute("role", "link");
+
+		chip.addEventListener("keydown", e => {
+			if (e.key !== "Enter" && e.key !== " ") return;
+			e.preventDefault();
+
+			const calendarEl = chip.closest(".ec-calendar");
+			const calendar = calendarEl?._tuiCalendar;
+			if (!calendar) return;
+
+			// chip.dataset.calendarId = wewnętrzne id "kalendarza" TUI
+			// (zawsze "1" u nas, patrz calendars: [{id: "1", ...}] w
+			// getCalendarConfig()) — inny namespace niż nasze
+			// calendarEl.dataset.calendarId (id instancji shortcode'a,
+			// klucz do window.eventCalendarData).
+			const event = calendar.getEvent(
+				chip.dataset.eventId,
+				chip.dataset.calendarId,
+			);
+			if (event) activateEvent(event, calendarEl.dataset.calendarId);
+		});
 	});
 }
 
@@ -448,6 +500,11 @@ function scheduleCalendarRender(calendarId) {
 function onCalendarRendered(calendarId) {
 	replaceMoreText();
 	updateDateDisplayFromDOM(calendarId);
+
+	const calendarEl = document.querySelector(
+		`.ec-calendar[data-calendar-id="${calendarId}"]`,
+	);
+	makeEventsFocusable(calendarEl);
 }
 
 function replaceMoreText() {
@@ -672,12 +729,16 @@ function observePopups() {
 				const isPopup = node.classList?.contains(
 					"toastui-calendar-see-more-container",
 				);
-				const hasPopup = node.querySelector?.(
+				const popupInside = node.querySelector?.(
 					".toastui-calendar-see-more-container",
 				);
+				const popupNode = isPopup ? node : popupInside;
 
-				if (isPopup || hasPopup) {
-					requestAnimationFrame(replaceDayNames);
+				if (popupNode) {
+					requestAnimationFrame(() => {
+						replaceDayNames();
+						makeEventsFocusable(popupNode);
+					});
 				}
 			}
 		}

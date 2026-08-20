@@ -523,10 +523,20 @@ add_action('init', function () {
             $view_buttons
         );
 
-        // Calendar container
+        // Calendar container + skip link. Widok siatki potrafi mieć
+        // dziesiątki wydarzeń, każde teraz osobnym tab-stopem (patrz
+        // makeEventsFocusable() w calendar-init.js) — bez tego klawiatura
+        // musiałaby przejść przez wszystkie, żeby dotrzeć do treści za
+        // kalendarzem.
+        $skip_target_id = sprintf('ec-calendar-events-end-%d', $calendar_count);
+
         return $navigation . sprintf(
-            '<div class="ec-calendar" data-calendar-view="%s" data-calendar-id="%d"></div>',
+            '<a href="#%2$s" class="ec-skip-link">%3$s</a>
+            <div class="ec-calendar" data-calendar-view="%1$s" data-calendar-id="%4$d"></div>
+            <span id="%2$s" tabindex="-1"></span>',
             esc_attr($atts['view']),
+            esc_attr($skip_target_id),
+            esc_html__('Skip calendar events', 'event-calendar'),
             $calendar_count
         );
     });

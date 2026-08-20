@@ -30,7 +30,7 @@ msgid "Calendar Settings"
 msgstr "Ustawienia kalendarza"
 
 #: blocks/calendar/index.php:34
-#: event-calendar.php:520
+#: event-calendar.php:522
 msgid "View"
 msgstr "Widok"
 
@@ -164,10 +164,12 @@ msgid "Today"
 msgstr "Dziś"
 
 #: event-calendar.php:465
+#: event-calendar.php:520
 msgid "Previous"
 msgstr "Poprzedni"
 
 #: event-calendar.php:466
+#: event-calendar.php:521
 msgid "Next"
 msgstr "Następny"
 
@@ -277,3 +279,7 @@ msgstr "Ustawienia kalendarza zdarzeń"
 #: event-calendar.php
 msgid "Lightweight, flexible WordPress plugin to create and display events — custom CPT, meta fields, Gutenberg block, shortcode, REST API"
 msgstr "Lekka, elastyczna wtyczka WordPress do tworzenia i wyświetlania wydarzeń — własny CPT, pola meta, blok Gutenberga, shortcode, REST API"
+
+#: event-calendar.php:539
+msgid "Skip calendar events"
+msgstr "Pomiń wydarzenia kalendarza"

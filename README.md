@@ -322,20 +322,43 @@ npm run test:php  # tylko testy PHP (uruchamiane bezpośrednio, bez PHPUnit)
 
 ---
 
-## Dostępność — otwarte
+## Dostępność
 
-**Siatka kalendarza nie jest operowalna klawiaturą (WCAG 2.1.1).** Sprawdzone
-na żywo 2026-08-19, nadal aktualne po audycie 2026-08-20: Tab przechodzi przez
-„dziś"/strzałki prev-next/przełącznik widoku (dzień/tydzień/miesiąc), po czym
-wychodzi z kalendarza — NIE wchodzi w poszczególne dni/wydarzenia w siatce.
-Potwierdzone w kodzie ToastUI Calendar (`toastui-calendar.min.js`): pola
-wydarzeń w widoku miesiąca/tygodnia są zwykłymi `<div>` bez `tabindex`/`role`
-— biblioteka nie daje tu żadnej wbudowanej obsługi klawiatury do dogrania.
-Efekt: użytkownik samej klawiatury widzi kalendarz, ale nie ma jak otworzyć
-konkretnego dnia ani wydarzenia — tylko mysz/dotyk. Do zdecydowania: łatanie
-DOM po każdym renderze (dopisanie `tabindex="0"` + `keydown` do pól wydarzeń,
-analogicznie do `replaceMoreText()`/`replaceDayNames()`) vs. równoległa,
-ukryta wizualnie lista wydarzeń jako link dla klawiatury/SR.
+**Siatka kalendarza operowalna klawiaturą — naprawione (2026-08-20).**
+Sprawdzone na żywo 2026-08-19: Tab przechodził przez „dziś"/strzałki
+prev-next/przełącznik widoku, po czym wychodził z kalendarza — NIE wchodził
+w poszczególne dni/wydarzenia w siatce (WCAG 2.1.1). Przyczyna, potwierdzona
+w kodzie ToastUI Calendar (`toastui-calendar.min.js`): pola wydarzeń to
+zwykłe `<div>` bez `tabindex`/`role`, a wykrywanie kliknięcia to własny
+system gestów przeciągania (`onMouseUp` po naciśnięciu bez ruchu), nie
+natywny `click` — biblioteka nie daje tu żadnej wbudowanej obsługi
+klawiatury, i nie da się jej podrobić przez `el.click()`.
+
+Fix w `calendar-init.js`: `makeEventsFocusable()`, wpięte w istniejący hook
+`onCalendarRendered()` (analogicznie do `replaceMoreText()`), po każdym
+renderze dopisuje `tabindex="0"` + `role="link"` + `keydown` (Enter/Spacja)
+do elementów z `data-event-id`/`data-calendar-id` — tych samych atrybutów,
+których ToastUI używa wewnętrznie w `calendar.getElement()`. Po
+Enter/Spacji: `calendar.getEvent(id, calendarId)` odtwarza pełne dane
+wydarzenia (łącznie z naszym `raw.url`), puszczone przez współdzielony
+`activateEvent()` — tę samą ścieżkę co klik myszą (`initEventClickBehavior()`).
+Ta sama łatka odpalana jest też na treści popupu „+N więcej"
+(`observePopups()`), bo to osobny fragment DOM doklejany przy każdym
+otwarciu. Ponieważ patch działa na tym, co faktycznie jest w DOM w danym
+momencie, a ToastUI renderuje tylko wydarzenia aktualnie wyświetlanego
+widoku (miesiąc/tydzień/dzień) — Tab naturalnie ogranicza się do tego, co
+widać na ekranie; nawigacja prev/next/dziś przebudowuje DOM i przebudowuje
+też dostępne tab-stopy.
+
+Do tego doszedł skip link (`.ec-skip-link` w [assets/css/calendar.css](assets/css/calendar.css),
+markup w `event-calendar.php`) — widok miesiąca to potencjalnie kilkadziesiąt
+tab-stopów, więc zaraz przed `.ec-calendar` jest niewidoczny (aż do focusu)
+link „Pomiń wydarzenia kalendarza", który przenosi focus na pusty `<span
+tabindex="-1">` zaraz za kalendarzem. Chowany klasycznym clip-em (jak WP
+core `.screen-reader-text`), nie `position:absolute; top:-9999px` — to
+drugie wymagałoby pozycjonowanego przodka, żeby po `:focus` wylądować przy
+kalendarzu zamiast gdzieś w strukturze strony (dokładnie ten sam bug co
+przy popupie „+N więcej", patrz niżej).
 
 **Popup „+N więcej" — naprawiony (2026-08-20).** Był to realny, osobny
 mechanizm od `useDetailPopup` (który faktycznie jest wyłączony i dotyczy
