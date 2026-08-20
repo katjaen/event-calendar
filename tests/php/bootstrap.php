@@ -24,6 +24,9 @@ define('ABSPATH', __DIR__ . '/');
 // Prawdziwa ścieżka do katalogu wtyczki — tests/php/ -> tests/ -> event-calendar/
 define('EC_TEST_PLUGIN_DIR', dirname(__DIR__, 2) . '/');
 
+// Stałe czasu WordPressa, których kod wtyczki używa wprost.
+define('HOUR_IN_SECONDS', 3600);
+
 // ── "opcje" WordPressa jako zwykła zmienna globalna w pamięci ──────────────
 $GLOBALS['__wp_options'] = [];
 
@@ -82,6 +85,17 @@ function ec_test_get_action(string $tag): callable
  * pozycji konkretnego callbacku w tablicy.
  */
 function ec_test_fire(string $tag, ...$args): void
+{
+    do_action($tag, ...$args);
+}
+
+/**
+ * Realny do_action() — nie tylko dla testów wprost wołających go (jak
+ * ec_test_fire()), ale też dla stubów niżej (update_post_meta() i
+ * add_post_meta()), które same odpalają updated_post_meta/added_post_meta
+ * tak jak prawdziwy WordPress.
+ */
+function do_action(string $tag, ...$args): void
 {
     foreach ($GLOBALS['__wp_actions'][$tag] ?? [] as $cb) {
         $cb(...$args);
@@ -297,7 +311,48 @@ function load_plugin_textdomain(...$args): void {}
 function get_posts(...$args): array { return []; }
 function update_meta_cache(...$args): void {}
 function wp_list_pluck($list, $field) { return array_column((array) $list, $field); }
-function get_post_meta(...$args): array { return []; }
+
+// ── postmeta jako prawdziwy magazyn w pamięci (nie zaślepka) ────────────────
+// Potrzebne żeby przetestować ec_normalize_event_end_date() (event-calendar.php)
+// na realnym zachowaniu update_post_meta()/added_post_meta()/updated_post_meta() —
+// dokładnie tak samo jak apply_filters() jest realny wyżej.
+$GLOBALS['__wp_post_meta'] = [];
+
+function get_post_meta($post_id, $key = '', $single = false)
+{
+    $all = $GLOBALS['__wp_post_meta'][$post_id] ?? [];
+
+    if ($key === '') {
+        return $all;
+    }
+
+    $values = $all[$key] ?? [];
+
+    if ($single) {
+        return $values[0] ?? '';
+    }
+
+    return $values;
+}
+
+function update_post_meta($post_id, $key, $value): bool
+{
+    $existed = isset($GLOBALS['__wp_post_meta'][$post_id][$key]);
+    $GLOBALS['__wp_post_meta'][$post_id][$key] = [$value];
+
+    do_action($existed ? 'updated_post_meta' : 'added_post_meta', 1, $post_id, $key, $value);
+
+    return true;
+}
+
+function add_post_meta($post_id, $key, $value, $unique = false)
+{
+    $GLOBALS['__wp_post_meta'][$post_id][$key][] = $value;
+    do_action('added_post_meta', 1, $post_id, $key, $value);
+
+    return true;
+}
+
 function get_permalink(...$args): string { return ''; }
 function wp_hash($data): string { return md5((string) $data); }
 function set_transient(...$args): bool { return true; }
@@ -340,6 +395,7 @@ function ec_test_reset_state(): void
 {
     $GLOBALS['__wp_options'] = [];
     $GLOBALS['__wp_current_user_can'] = true;
+    $GLOBALS['__wp_post_meta'] = [];
     ec_test_reset_post_types();
 }
 

@@ -10,11 +10,17 @@ const MIRRORED_POST_TYPES = window.eventCalendarMirroredPostTypes || [];
 // --- Helper Functions (poza komponentem) ---
 
 const toggleAllDay = (value, meta, eventStart, eventEnd, editPost) => {
+	const startDateOnly = eventStart ? eventStart.split("T")[0] : "";
+
 	const updates = value
 		? {
 				_event_all_day: "1",
-				_event_start: eventStart ? eventStart.split("T")[0] : "",
-				_event_end: eventEnd ? eventEnd.split("T")[0] : "",
+				_event_start: startDateOnly,
+				// Brak daty końcowej -> ten sam dzień co start (wydarzenie
+				// jednodniowe), nie pusty string — puste _event_end
+				// wcześniej powodowało, że całodniowe wydarzenie bez
+				// końca nie pojawiało się w kalendarzu.
+				_event_end: eventEnd ? eventEnd.split("T")[0] : startDateOnly,
 			}
 		: {
 				_event_all_day: "0",

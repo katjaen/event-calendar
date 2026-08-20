@@ -232,6 +232,59 @@ add_action('init', function () {
 }, 20);
 
 /* =========================
+    EVENT DATE NORMALIZATION
+========================= */
+// register_post_meta()'s sanitize_callback nie ma dostępu do POZOSTAŁYCH pól
+// (nie da się stąd sprawdzić _event_start podczas sanityzacji _event_end) —
+// a sidebar Gutenberga w tym pluginie to nie jedyna droga zapisu tego meta:
+// core-gmina i podobne wtyczki piszą je własnym save hookiem (patrz komentarz
+// przy "MIRRORED_POST_TYPES" niżej). updated_post_meta/added_post_meta
+// odpala się dla KAŻDEGO update_post_meta(), niezależnie od tego, kto go
+// wywołał — jedyne miejsce, gdzie da się to zagwarantować raz zamiast osobno
+// w każdym miejscu, które te dane czyta (REST endpoint, calendar-init.js,
+// query-builder.php mieli własne, niezależne od siebie fallbacki na wypadek
+// pustego _event_end — ten hook sprawia, że w bazie zwyczajnie nie ma już
+// takiego przypadku).
+add_action('updated_post_meta', 'ec_normalize_event_end_date', 10, 4);
+add_action('added_post_meta', 'ec_normalize_event_end_date', 10, 4);
+
+function ec_normalize_event_end_date($meta_id, $post_id, $meta_key, $meta_value)
+{
+    if (!in_array($meta_key, ['_event_start', '_event_end', '_event_all_day'], true)) {
+        return;
+    }
+
+    // update_post_meta() niżej odpala ten sam hook ponownie — bez tego
+    // byłaby nieskończona pętla.
+    static $normalizing = false;
+    if ($normalizing) {
+        return;
+    }
+
+    $start = get_post_meta($post_id, '_event_start', true);
+    $startTime = $start ? strtotime($start) : false;
+    if ($startTime === false) {
+        return;
+    }
+
+    $end = get_post_meta($post_id, '_event_end', true);
+    $endTime = $end ? strtotime($end) : false;
+
+    if ($endTime !== false && $endTime >= $startTime) {
+        return; // już poprawne, nic do zrobienia
+    }
+
+    $isAllDay = get_post_meta($post_id, '_event_all_day', true) === '1';
+    $newEnd = $isAllDay
+        ? substr($start, 0, 10)
+        : date('Y-m-d\TH:i', $startTime + HOUR_IN_SECONDS);
+
+    $normalizing = true;
+    update_post_meta($post_id, '_event_end', $newEnd);
+    $normalizing = false;
+}
+
+/* =========================
     GUTENBERG SIDEBAR
 ========================= */
 

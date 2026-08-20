@@ -103,8 +103,8 @@
 	   tygodniu; przy pustym/domyślnym panelu wynik jest dokładny, przy
 	   widocznych wydarzeniach całodniowych siatka godzin (a więc i
 	   --ec-hour-height) skurczy się o tyle, o ile urósł ten panel. */
-	--ec-month-cell-height: 110px;
-	--ec-hour-height: 48px;
+	--ec-month-cell-height: 80px;
+	--ec-hour-height: 30px;
 }
 
 /* ==================================

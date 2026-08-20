@@ -96,6 +96,7 @@ event-calendar/
 │       ├── bootstrap.php
 │       ├── test-query-builder.php
 │       ├── test-color-and-settings.php
+│       ├── test-event-date-normalization.php
 │       └── test-i18n-completeness.php
 ├── jest.config.js
 ├── package.json
@@ -130,6 +131,21 @@ Pola są przechowywane jako post meta:
 | `_event_all_day`  | `"0"` / `"1"` | Czy całodniowe                                         |
 | `_event_location` | string        | Lokalizacja                                            |
 | `_event_color`    | hex string    | Kolor (domyślnie `#d3c1ef`)                            |
+
+**`_event_end` jest zawsze uzupełniane automatycznie, jeśli brakuje albo jest
+wcześniejsze niż `_event_start`.** `register_post_meta()`'s `sanitize_callback`
+widzi tylko jedno pole naraz, więc nie może porównać start/koniec — a sidebar
+Gutenberga w tym pluginie to nie jedyna droga zapisu tego meta (inne wtyczki,
+np. core-gmina, mirrorują własne pola przez swój save hook, patrz
+`MIRRORED_POST_TYPES` w `event-calendar.php`). Zamiast walidować to w
+konkretnym UI, `ec_normalize_event_end_date()` (event-calendar.php) wpięte w
+`updated_post_meta`/`added_post_meta` łapie **każdy** zapis `_event_start`/
+`_event_end`/`_event_all_day`, niezależnie od pochodzenia, i koryguje
+`_event_end`: brak lub wcześniejsze niż start → całodniowe dostaje ten sam
+dzień co start, pozostałe start + 1h. Dotyczy tylko wydarzeń zapisanych *po*
+wdrożeniu tej poprawki — starsze wpisy z pustym/błędnym `_event_end` trzeba
+otworzyć i zapisać ponownie (albo przepuścić przez jednorazowy skrypt), żeby
+hook je złapał.
 
 ---
 

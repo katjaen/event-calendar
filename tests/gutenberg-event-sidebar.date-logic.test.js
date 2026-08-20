@@ -51,6 +51,21 @@ describe("toggleAllDay()", () => {
 		});
 	});
 
+	test("włączenie all-day bez daty końcowej -> koniec = start, nie pusty string (wydarzenie jednodniowe nie znika z kalendarza)", () => {
+		const { toggleAllDay } = loadSidebarFresh();
+		const editPost = jest.fn();
+
+		toggleAllDay(true, {}, "2026-08-10T09:00", "", editPost);
+
+		expect(editPost).toHaveBeenCalledWith({
+			meta: {
+				_event_all_day: "1",
+				_event_start: "2026-08-10",
+				_event_end: "2026-08-10",
+			},
+		});
+	});
+
 	test("wyłączenie all-day dokleja domyślne godziny 00:00 / 23:59 do samych dat", () => {
 		const { toggleAllDay } = loadSidebarFresh();
 		const editPost = jest.fn();
