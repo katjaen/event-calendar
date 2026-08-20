@@ -54,11 +54,9 @@ function add_filter(string $tag, callable $cb, int $priority = 10, int $accepted
 
 /**
  * apply_filters() jest realny (odpala callbacki zarejestrowane przez
- * add_filter powyżej) — dzięki temu np. `ec_events_per_page` da się
- * przetestować tak samo jak w prawdziwym WP. Wyjątek: $ec_months_back /
- * $ec_months_ahead w query-builder.php są liczone RAZ, w momencie require —
- * żeby przetestować inny zakres miesięcy, nadpisz $GLOBALS['ec_months_back']
- * / $GLOBALS['ec_months_ahead'] bezpośrednio w teście (patrz test-query-builder.php).
+ * add_filter powyżej) — dzięki temu np. `ec_events_per_page` oraz
+ * `ec_event_months_back` / `ec_event_months_ahead` da się przetestować
+ * tak samo jak w prawdziwym WP (patrz test-query-builder.php).
  */
 function apply_filters(string $tag, $value, ...$args)
 {

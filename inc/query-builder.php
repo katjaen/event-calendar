@@ -7,10 +7,6 @@
 
 if (!defined('ABSPATH')) exit;
 
-// How many months to display back and ahead
-$ec_months_back  = apply_filters('ec_event_months_back', 2);
-$ec_months_ahead = apply_filters('ec_event_months_ahead', 2);
-
 /**
  * Build WP_Query arguments for events
  * 
@@ -24,7 +20,13 @@ $ec_months_ahead = apply_filters('ec_event_months_ahead', 2);
  */
 function ec_build_events_query($config = [])
 {
-    global $ec_months_back, $ec_months_ahead;
+    // How many months to display back and ahead. Resolved here (call time,
+    // i.e. during shortcode/REST render) rather than at file-include time —
+    // add_filter() calls in a theme's functions.php run after plugins are
+    // loaded, so evaluating apply_filters() at the top of this file would
+    // run before any override had a chance to register.
+    $ec_months_back  = apply_filters('ec_event_months_back', 2);
+    $ec_months_ahead = apply_filters('ec_event_months_ahead', 2);
 
     $defaults = [
         'post_type' => '',

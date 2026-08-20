@@ -507,16 +507,18 @@ add_action('init', function () {
         // Navigation HTML
         $navigation = sprintf(
             '<div class="ec-calendar-nav" data-calendar-target="%1$d">
-                <button data-action="today">%2$s</button>
+                <button type="button" data-action="today">%2$s</button>
                 <div style="display: flex; gap: 4px;">
-                    <button data-action="prev">‹</button>
-                    <button data-action="next">›</button>
+                    <button type="button" data-action="prev" aria-label="%3$s">‹</button>
+                    <button type="button" data-action="next" aria-label="%4$s">›</button>
                 </div>
-                <span class="ec-calendar-current-date" data-calendar-id="%1$d"></span>
-                <div class="ec-calendar-view-switch" role="group" aria-label="%3$s">%4$s</div>
+                <span class="ec-calendar-current-date" data-calendar-id="%1$d" aria-live="polite"></span>
+                <div class="ec-calendar-view-switch" role="group" aria-label="%5$s">%6$s</div>
             </div>',
             $calendar_count,
             esc_html__('Today', 'event-calendar'),
+            esc_attr__('Previous', 'event-calendar'),
+            esc_attr__('Next', 'event-calendar'),
             esc_attr__('View', 'event-calendar'),
             $view_buttons
         );

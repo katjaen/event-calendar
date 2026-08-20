@@ -74,22 +74,20 @@ assert_equal('1', $args['meta_query'][0]['value'], 'pierwszy warunek: wartość 
 assert_true(in_array('event', $args['post_type'], true), 'domyślnie zapytanie obejmuje "event"');
 assert_true(!isset($args['tax_query']), 'bez taxonomy_queries w configu -> brak tax_query w ogóle');
 
-ec_test_section('ec_build_events_query() — zakres dat liczony z $ec_months_back / $ec_months_ahead');
+ec_test_section('ec_build_events_query() — zakres dat liczony z ec_event_months_back / ec_event_months_ahead');
 
 ec_test_reset_state();
 ec_test_fire('init');
-// Wartości ustawiane raz przy require (apply_filters z domyślnym 2), ale
-// funkcja czyta je przez `global`, więc można je podmienić wprost w teście —
-// nie trzeba przeładowywać całego pliku ani bawić się w add_filter przed require.
-$GLOBALS['ec_months_back'] = 1;
-$GLOBALS['ec_months_ahead'] = 1;
+// apply_filters() jest odczytywane wewnątrz ec_build_events_query() (call
+// time), więc add_filter() rejestrowany tu, przed wywołaniem, faktycznie
+// nadpisuje domyślną wartość — tak samo jak zrobiłby to theme'owy functions.php.
+add_filter('ec_event_months_back', fn() => 1);
+add_filter('ec_event_months_ahead', fn() => 1);
 $args2 = ec_build_events_query([]);
 $expectedStart = date('Y-m-01', strtotime('-1 months'));
 $expectedEnd   = date('Y-m-t', strtotime('+1 months'));
 assert_equal($expectedStart, $args2['meta_query'][2]['value'], 'start_date = początek miesiąca sprzed 1 miesiąca');
 assert_equal($expectedEnd, $args2['meta_query'][3]['value'], 'end_date = koniec miesiąca za 1 miesiąc');
-$GLOBALS['ec_months_back'] = 2;
-$GLOBALS['ec_months_ahead'] = 2;
 
 ec_test_section('ec_build_events_query() — taxonomy_queries + tax_relation trafiają do tax_query');
 

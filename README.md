@@ -301,6 +301,34 @@ npm run test:php  # tylko testy PHP (uruchamiane bezpośrednio, bez PHPUnit)
 
 ---
 
+## Dostępność — otwarte
+
+**Siatka kalendarza nie jest operowalna klawiaturą (WCAG 2.1.1).** Sprawdzone
+na żywo 2026-08-19, nadal aktualne po audycie 2026-08-20: Tab przechodzi przez
+„dziś"/strzałki prev-next/przełącznik widoku (dzień/tydzień/miesiąc), po czym
+wychodzi z kalendarza — NIE wchodzi w poszczególne dni/wydarzenia w siatce.
+Potwierdzone w kodzie ToastUI Calendar (`toastui-calendar.min.js`): pola
+wydarzeń w widoku miesiąca/tygodnia są zwykłymi `<div>` bez `tabindex`/`role`
+— biblioteka nie daje tu żadnej wbudowanej obsługi klawiatury do dogrania.
+Efekt: użytkownik samej klawiatury widzi kalendarz, ale nie ma jak otworzyć
+konkretnego dnia ani wydarzenia — tylko mysz/dotyk. Do zdecydowania: łatanie
+DOM po każdym renderze (dopisanie `tabindex="0"` + `keydown` do pól wydarzeń,
+analogicznie do `replaceMoreText()`/`replaceDayNames()`) vs. równoległa,
+ukryta wizualnie lista wydarzeń jako link dla klawiatury/SR.
+
+**Popup „+N więcej" — naprawiony (2026-08-20).** Był to realny, osobny
+mechanizm od `useDetailPopup` (który faktycznie jest wyłączony i dotyczy
+tylko kliku w pojedyncze wydarzenie) — popup przepełnienia dnia
+(`.toastui-calendar-see-more-container`) renderuje się przez ToastUI zawsze,
+niezależnie od tej flagi. Przyczyna złego pozycjonowania: `.ec-calendar` nie
+miało `position` ustawionego, więc `.toastui-calendar-floating-layer` (siostra
+`.toastui-calendar-layout`, nie jej dziecko) szukało najbliższego
+pozycjonowanego przodka poza kalendarzem — stąd popup lądował gdzieś w
+strukturze strony zamiast przy siatce. Fix: `position: relative` na
+`.ec-calendar` ([assets/css/calendar.css](assets/css/calendar.css)).
+
+---
+
 ## Changelog
 
 ### Unreleased

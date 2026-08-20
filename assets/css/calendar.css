@@ -177,6 +177,9 @@
 	display: block;
 }
 
+.ec-calendar {
+	position: relative;
+}
 /* navigation */
 .ec-calendar-nav {
 	display: flex;
