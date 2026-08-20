@@ -41,7 +41,12 @@
 	/* --- Backgrounds --- */
 	--ec-bg-cal-body: var(--ec-bg-transparent);
 	--ec-bg-cal-header: var(--ec-bg-transparent);
-	--ec-bg-cal-popup: var(--ec-bg-safe);
+	/* Osobna zmienna, nie alias 1:1 do --ec-bg-safe (ta jest współdzielona
+	   ze skip-linkiem i tłem aktywnych przycisków nawigacji, patrz niżej w
+	   pliku) — --base-ultra-light z motywu (ACSS) daje jasnoniebieskiemu
+	   tłu popupu neutralny odcień spójny z resztą strony, gdy motyw go
+	   definiuje; bez niego zostaje domyślny --ec-bg-safe wtyczki. */
+	--ec-bg-cal-popup: var(--base-ultra-light, var(--ec-bg-safe));
 
 	--ec-bg-transparent: transparent;
 	--ec-bg-safe: light-dark(
@@ -134,6 +139,7 @@
 
 	/* --- Backgrounds --- */
 	--ec-bg-safe: oklch(32.518% 0.01576 248.37);
+	--ec-bg-cal-popup: var(--base-ultra-dark, var(--ec-bg-safe));
 	--ec-bg-weekend: oklab(55.208% 0 -0.00006 / 0.03);
 
 	--ec-bg-accent-today: color-mix(
