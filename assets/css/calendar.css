@@ -8,7 +8,15 @@
 	color-scheme: light dark;
 
 	/* --- Texts --- */
-	--ec-text-color: light-dark(oklch(20% 0.01 250), oklch(92% 0.01 250));
+	/* var(--text-color, ...) dodane w audycie 2026-08-22 — kalendarz nie
+	   jest dziś wdrożony nigdzie bez katjaen-theme (pierwsze wdrożenie:
+	   UGK), więc nie ma powodu utrzymywać niezależnej palety zamiast
+	   czytać już poprawnie odwracający się token motywu. light-dark()
+	   zostaje jako fallback na wypadek przyszłego użycia bez theme. */
+	--ec-text-color: var(
+		--text-color,
+		light-dark(oklch(20% 0.01 250), oklch(92% 0.01 250))
+	);
 	--ec-text-muted: var(
 		--text-muted,
 		light-dark(
@@ -64,6 +72,10 @@
 	);
 
 	/* --- Borders --- */
+	/* var(--border-color, ...) dodane w audycie 2026-08-22, cofnięte tego
+	   samego dnia na Twoją prośbę — stalowoniebieski jest tu celowym,
+	   niezależnym od klienta domyślnym tonem pluginu (pasuje niezależnie od
+	   marki), nie duplikatem do scalenia z theme. Zostaje jak było. */
 	--ec-border-color: light-dark(
 		oklch(83.934% 0.03108 226.227),
 		oklch(51.204% 0.0315 228.361)
@@ -108,7 +120,7 @@
 	   tygodniu; przy pustym/domyślnym panelu wynik jest dokładny, przy
 	   widocznych wydarzeniach całodniowych siatka godzin (a więc i
 	   --ec-hour-height) skurczy się o tyle, o ile urósł ten panel. */
-	--ec-month-cell-height: 80px;
+	--ec-month-cell-height: 72px;
 	--ec-hour-height: 30px;
 }
 
@@ -132,7 +144,13 @@
 	);
 
 	/* --- Accent --- */
-	--ec-accent: oklch(48.889% 0.14378 235.803);
+	/* BYŁO na sztywno oklch(...) (niebieski) — wygrywało z var(--accent)
+	   z bazowego :root nawet gdy theme.css/theme-ugk.css definiuje
+	   --accent (specyficzność .color-scheme--alt bije goły :root), więc
+	   w trybie dark akcent kalendarza ignorował --primary klienta. var()
+	   z tym samym niebieskim jako fallback — ten sam wzorzec co w bazowym
+	   :root wyżej. Złapane na żywo 2026-08-22. */
+	--ec-accent: var(--accent, oklch(48.889% 0.14378 235.803));
 
 	/* --- Events --- */
 	--ec-event-color-default: oklch(65% 0.08 290);
@@ -363,9 +381,17 @@
 	max-width: 32px;
 } */
 
-/* month view dot fot today */
+/* month view dot fot today — biblioteka/nasz override ustawiają tylko tło,
+   nigdy color, więc cyfra dziedziczyła zwykły kolor tekstu otoczenia.
+   W .a11y-contrast to niewidoczne: --ec-accent (tło kółka) i tekst strony
+   stają się tym samym żółtym (oba pochodzą od --primary/--text-color).
+   var(--btn-color, #fff) — ten sam token i ten sam powód co przy
+   przyciskach w theme.css (tam --btn-color już przełącza się na czarny
+   w .a11y-contrast, dokładnie z tego samego powodu: biały tekst na
+   zoltym tle). Złapane na żywo 2026-08-23. */
 .toastui-calendar-weekday-grid-date.toastui-calendar-weekday-grid-date-decorator {
 	background-color: var(--ec-accent) !important;
+	color: var(--btn-color, #fff);
 }
 .toastui-calendar-weekday-event-dot + .toastui-calendar-weekday-event-title {
 	color: var(--ec-text-color) !important;
