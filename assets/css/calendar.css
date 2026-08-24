@@ -72,13 +72,17 @@
 	);
 
 	/* --- Borders --- */
-	/* var(--border-color, ...) dodane w audycie 2026-08-22, cofnięte tego
-	   samego dnia na Twoją prośbę — stalowoniebieski jest tu celowym,
-	   niezależnym od klienta domyślnym tonem pluginu (pasuje niezależnie od
-	   marki), nie duplikatem do scalenia z theme. Zostaje jak było. */
-	--ec-border-color: light-dark(
-		oklch(83.934% 0.03108 226.227),
-		oklch(51.204% 0.0315 228.361)
+	/* var(--border-color, ...) — cofnięte 2026-08-22, PRZYWRÓCONE
+	   2026-08-24: stalowoniebieski jako niezależny, domyślny ton
+	   pluginu miał sens sam w sobie, ale odcinał kalendarz od
+	   .a11y-contrast (theme.css zmienia --border-color na żółty w
+	   kontraście — bez tego powiązania bordery kalendarza zostawały
+	   stalowe nawet w trybie kontrastu, jedyne miejsce w serwisie,
+	   które tego nie dostawało). light-dark() zostaje jako fallback,
+	   gdyby kalendarz kiedyś działał bez theme. */
+	--ec-border-color: var(
+		--border-color,
+		light-dark(oklch(83.934% 0.03108 226.227), oklch(51.204% 0.0315 228.361))
 	);
 	--ec-border-color-muted: var(
 		--border-color-muted,
@@ -167,7 +171,12 @@
 	);
 
 	/* --- Borders --- */
-	--ec-border-color: oklch(51.204% 0.0315 228.361);
+	/* var(--border-color, ...) — sam powód i ten sam moment co w bazowym
+	   :root wyżej (przywrócone 2026-08-24). Bez tego ta reguła (wyższa
+	   specyficzność, .color-scheme--alt) wygrywałaby własnym, twardym
+	   kolorem nad poprawnie już podłączonym --border-color z bazowego
+	   bloku — ten sam typ błędu, co wcześniej złapany przy --ec-accent. */
+	--ec-border-color: var(--border-color, oklch(51.204% 0.0315 228.361));
 	--ec-border-color-muted: var(
 		--border-color-muted,
 		color-mix(in oklch, var(--ec-border-color), var(--ec-bg-transparent))
