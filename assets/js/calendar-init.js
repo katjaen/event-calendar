@@ -70,6 +70,21 @@ let DEFAULT_EVENT_COLOR = "rgb(212, 196, 237)";
 let CALENDAR_HOUR_START = 0;
 let CALENDAR_HOUR_END = 24;
 
+// Widok miesiąca: ile pasków zdarzeń mieści się w komórce, zanim reszta
+// zwinie się do "+N więcej". Na wąskim ekranie 0 — same liczniki, klik
+// otwiera popup (na 375px pasek i tak jest za mały, żeby w niego celować,
+// a komórki są niższe, patrz --ec-month-cell-height w calendar.css).
+// Musi zgadzać się z tym samym breakpointem co CSS.
+const MOBILE_MEDIA_QUERY = "(max-width: 600px)";
+const MONTH_VISIBLE_EVENT_COUNT_DESKTOP = 6;
+let MONTH_VISIBLE_EVENT_COUNT = MONTH_VISIBLE_EVENT_COUNT_DESKTOP;
+
+function refreshMonthVisibleEventCount() {
+	MONTH_VISIBLE_EVENT_COUNT = window.matchMedia(MOBILE_MEDIA_QUERY).matches
+		? 0
+		: MONTH_VISIBLE_EVENT_COUNT_DESKTOP;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
 	if (typeof eventCalendarData === "undefined") {
 		console.error("Event Calendar: Configuration not loaded");
@@ -100,9 +115,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	helpers.cleanup();
 
+	refreshMonthVisibleEventCount();
+
 	initEventCalendars();
 	initThemeObserver();
 	observePopups();
+
+	// Przejście przez breakpoint (obrót małego tabletu, zmiana rozmiaru
+	// okna) — przelicz i wepchnij nową wartość do istniejących instancji
+	// bez pełnego re-inita.
+	window.matchMedia(MOBILE_MEDIA_QUERY).addEventListener("change", () => {
+		refreshMonthVisibleEventCount();
+		document.querySelectorAll(".ec-calendar").forEach(el => {
+			const calendar = el._tuiCalendar;
+			if (!calendar) return;
+			calendar.setOptions({
+				month: { visibleEventCount: MONTH_VISIBLE_EVENT_COUNT },
+			});
+			calendar.render();
+		});
+	});
 
 	// --- Toggle for alt color scheme (ACSS) ---
 	const toggle = document.querySelector("#color-scheme-toggle");
@@ -282,6 +314,7 @@ function getCalendarConfig(view, calendarId) {
 			startDayOfWeek: START_DAY_OF_WEEK,
 			dayNames: calendarData.dayNamesShort,
 			alldayTitle: calendarData.allDayLabel,
+			visibleEventCount: MONTH_VISIBLE_EVENT_COUNT,
 		},
 
 		day: {
@@ -303,6 +336,27 @@ function getCalendarTemplates(calendarData) {
 			return `<span class="calendar-week-dayname-name">${
 				names[dayname.day] || ""
 			}</span>`;
+		},
+		// Nagłówek popupu "+N więcej". Domyślny szablon TUI renderuje
+		// angielski, sztywny skrót dnia; podmienialiśmy go po fakcie
+		// (replaceDayNames()), ale przy otwarciu popupu preact zdążał
+		// nadpisać span po nas i zostawało "Sun". Nadpisanie szablonu robi
+		// to u źródła — model.day to indeks 0=niedz., zgodny z
+		// dayNamesShort z PHP. model.date to gotowy numer dnia ("16").
+		monthMoreTitleDate({ date, day }) {
+			const names = calendarData.dayNamesShort;
+			return `<span class="toastui-calendar-more-title-date">${date}</span><span class="toastui-calendar-more-title-day">${
+				names[day] || ""
+			}</span>`;
+		},
+		// Licznik ukrytych zdarzeń w komórce ("+N"). Domyślny szablon TUI
+		// renderuje "N more"; podmienialiśmy tekst po renderze
+		// (replaceMoreText(), usunięte), ale preact przy każdym kolejnym
+		// renderze wstawiał swoje węzły z powrotem OBOK naszych — stąd
+		// narastające "+11 more", "+22 more" zamiast "+1". Nadpisanie
+		// szablonu daje polską, stabilną formę u źródła. `count` to liczba.
+		monthGridHeaderExceed(count) {
+			return `+${count}`;
 		},
 		timegridDisplayPrimaryTime: ({ time }) =>
 			formatTimeLabelCentral(time?.d?.d || time?.time?.d?.d),
@@ -504,33 +558,12 @@ function scheduleCalendarRender(calendarId) {
 }
 
 function onCalendarRendered(calendarId) {
-	replaceMoreText();
 	updateDateDisplayFromDOM(calendarId);
 
 	const calendarEl = document.querySelector(
 		`.ec-calendar[data-calendar-id="${calendarId}"]`,
 	);
 	makeEventsFocusable(calendarEl);
-}
-
-function replaceMoreText() {
-	// Replace +N text
-	const moreEls = document.querySelectorAll(
-		".toastui-calendar-weekday-grid-more-events",
-	);
-
-	moreEls.forEach(el => {
-		if (!el.dataset.eventCount) {
-			const originalText = el.textContent.trim();
-			const countMatch = originalText.match(/\d+/);
-			if (!countMatch) return;
-			el.dataset.eventCount = countMatch[0];
-		}
-		el.textContent = `+${el.dataset.eventCount}`;
-	});
-
-	// Replace day names in main calendar
-	replaceDayNames();
 }
 
 /* =========================
@@ -715,11 +748,6 @@ function updateAllCalendarThemes() {
 		calendar.setTheme(theme);
 		calendar.render();
 	});
-
-	// Restore custom formatting after theme update
-	requestAnimationFrame(() => {
-		replaceMoreText();
-	});
 }
 
 /* =========================
@@ -783,46 +811,29 @@ function observePopups() {
 					fixSeeMorePopupPosition(popupNode);
 
 					requestAnimationFrame(() => {
-						replaceDayNames();
 						makeEventsFocusable(popupNode);
 					});
 				}
 			}
 		}
+
+		// Blokada scrolla strony, gdy popup "+N więcej" jest otwarty — na
+		// mobile jest position:fixed (patrz calendar.css), więc bez tego
+		// "pływa" nad przewijaną treścią i wygląda na zawieszony. Klasa
+		// zdejmowana, gdy TUI usunie popup z DOM. Sam efekt (overflow:hidden)
+		// jest w CSS ograniczony do @media mobile — na desktopie popup
+		// scrolluje się z sekcją i blokada jest niepotrzebna. Sprawdzamy
+		// obecność w DOM raz na porcję mutacji (add i remove), zamiast
+		// zgadywać, który węzeł dokładnie został wstawiony/usunięty.
+		const popupOpen = !!document.querySelector(
+			".toastui-calendar-see-more-container",
+		);
+		document.documentElement.classList.toggle("ec-more-open", popupOpen);
 	});
 
 	observer.observe(document.body, {
 		childList: true,
 		subtree: true,
-	});
-}
-
-/* =========================
-    REPLACE DAY NAMES
-========================= */
-function replaceDayNames() {
-	const dayEls = document.querySelectorAll(".toastui-calendar-more-title-day");
-
-	// Weź dayNames z pierwszego dostępnego kalendarza
-	const firstCalendarData = Object.values(window.eventCalendarData)[0];
-	if (!firstCalendarData?.dayNamesShort) return;
-
-	dayEls.forEach(el => {
-		const currentText = el.textContent.trim();
-		const englishDayMap = {
-			Sun: 0,
-			Mon: 1,
-			Tue: 2,
-			Wed: 3,
-			Thu: 4,
-			Fri: 5,
-			Sat: 6,
-		};
-
-		const dayIndex = englishDayMap[currentText];
-		if (dayIndex !== undefined && firstCalendarData.dayNamesShort[dayIndex]) {
-			el.textContent = firstCalendarData.dayNamesShort[dayIndex];
-		}
 	});
 }
 

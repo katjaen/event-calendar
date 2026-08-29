@@ -446,6 +446,21 @@
 ================================== */
 
 @media (max-width: 600px) {
+	:root {
+		/* Widok miesiąca: same liczniki "+N" (klik → popup), bez pasków
+		   zdarzeń w komórkach (visibleEventCount:0 w calendar-init.js) —
+		   komórka potrzebuje tylko numeru dnia i przycisku "+N", stąd
+		   niższa niż na desktopie. */
+		--ec-month-cell-height: 58px;
+		/* Widok dzień/tydzień: całe pole godzin niższe niż domyślne (30px
+		   → ~582px kontenera, ~72% ekranu telefonu). 24px daje ~474px
+		   (~58%) — siatka godzin dalej scrolluje się wewnątrz, ale krótszy
+		   kontener ułatwia przejście między scrollem godzin a scrollem
+		   strony. Wysokość kontenera = 42px + ta zmienna * liczba godzin
+		   (patrz reguła .ec-calendar[data-calendar-view="week"/"day"]). */
+		--ec-hour-height: 24px;
+	}
+
 	.toastui-calendar-weekday {
 		min-height: 54px;
 		height: auto;
@@ -492,14 +507,72 @@
 	   left ujemny (poza lewą krawędzią) — popup realnie niewidoczny bez
 	   przewinięcia. position:fixed + wyśrodkowanie w viewporcie omija
 	   to całkowicie, niezależnie od pozycji scrolla. !important
-	   konieczne — inline style (JS) normalnie biłoby zwykłą regułę. */
+	   konieczne — inline style (JS) normalnie biłoby zwykłą regułę.
+
+	   Wysokość: TUI wpisuje inline height:200px (z theme.moreView.height
+	   w calendar-init.js). Po powiększeniu wierszy niżej to za mało —
+	   auto + max-height:80vh, a .toastui-calendar-see-more staje się
+	   kolumną flex, żeby lista wewnątrz przewijała się sama. */
 	.toastui-calendar-see-more-container {
 		position: fixed !important;
 		top: 50% !important;
 		left: 50% !important;
 		transform: translate(-50%, -50%) !important;
 		z-index: 1000 !important;
-		max-width: 90vw;
+		width: min(92vw, 360px) !important;
+		height: auto !important;
+		max-width: 92vw;
 		max-height: 80vh;
+	}
+
+	.toastui-calendar-see-more {
+		display: flex !important;
+		flex-direction: column;
+		height: auto !important;
+		max-height: 80vh;
+	}
+
+	.toastui-calendar-month-more-list {
+		flex: 1 1 auto;
+		height: auto !important;
+		min-height: 0;
+	}
+
+	/* Backdrop TUI (łapie tap "obok" i zamyka popup) domyślnie pokrywa
+	   tylko obszar .ec-calendar. Fixed popup wyświetla się wyśrodkowany
+	   na ekranie, zwykle poza kalendarzem — więc tap obok niego nie
+	   trafiał w backdrop i popup wyglądał na zawieszony. Na mobile
+	   rozciągamy backdrop na cały viewport + przyciemnienie: czytelny
+	   modal, zamyka się dotknięciem w dowolnym miejscu obok. */
+	.toastui-calendar-popup-overlay {
+		position: fixed !important;
+		inset: 0 !important;
+		width: auto !important;
+		height: auto !important;
+		background: rgba(0, 0, 0, 0.45) !important;
+		z-index: 999 !important;
+	}
+
+	/* Blokada scrolla strony na czas otwartego popupu (klasa dokładana
+	   przez observePopups() w calendar-init.js). Tylko mobile — na
+	   desktopie popup scrolluje się razem z sekcją i blokada jest
+	   niepotrzebna. */
+	html.ec-more-open,
+	html.ec-more-open body {
+		overflow: hidden !important;
+	}
+
+	/* Wiersze wydarzeń w popupie: biblioteka wpisuje inline
+	   height:24px / line-height:24px / margin-top:5px — za ciasno, żeby
+	   trafić palcem. Min. 44px wysokości + 8px odstępu (WCAG 2.5.5).
+	   !important, bo nadpisujemy styl inline. */
+	.toastui-calendar-month-more-list .toastui-calendar-weekday-event {
+		display: flex !important;
+		align-items: center;
+		min-height: 44px !important;
+		height: auto !important;
+		line-height: 1.3 !important;
+		margin-top: 8px !important;
+		padding: 6px 8px !important;
 	}
 }

@@ -2,7 +2,7 @@
 
 Lekki, elastyczny plugin WordPress do tworzenia i wyświetlania wydarzeń. Obsługuje własny typ wpisu (CPT), pola meta, blok Gutenberga, shortcode oraz REST API.
 
-**Wersja:** 1.0.0  
+**Wersja:** 1.0.1  
 **Autor:** Katarzyna Niklas  
 **Licencja:** GPL-2.0+  
 **Text Domain:** `event-calendar`
@@ -31,6 +31,7 @@ Lekki, elastyczny plugin WordPress do tworzenia i wyświetlania wydarzeń. Obsł
 14. [Testy](#testy)
 15. [Changelog](#changelog)
     - [Unreleased](#unreleased)
+    - [1.0.1](#101)
     - [1.0.0](#100)
     - [0.2.1](#021)
     - [0.2.0](#020)
@@ -187,6 +188,15 @@ Wstaw blok **Event Calendar** w edytorze. Dostępne ustawienia w panelu Inspecto
 | `terms`     | —             | ID lub slugi terminów, oddzielone przecinkiem |
 | `operator`  | `IN`          | `IN`, `AND`, `NOT IN`                         |
 
+**Kontener a `z-index`.** Popup „+N więcej" w widoku miesiąca jest
+`position: fixed` i wyświetla się wyśrodkowany na ekranie. Jeśli kontener,
+w którym osadzony jest shortcode, tworzy własny kontekst stakowania
+(`isolation: isolate`, `transform`, `filter`, `will-change`, `contain` itd.)
+i nie ma własnego `z-index`, popup zostaje uwięziony na poziomie tego
+kontenera (0) i mogą go przykrywać pozycjonowane elementy spoza kalendarza
+(np. rozciągnięte linki kart, kontrolki karuzeli). Wtedy nadaj kontenerowi
+`z-index` wyższy niż te elementy, a niższy niż nawigacja witryny.
+
 ---
 
 ## REST API
@@ -296,10 +306,23 @@ wysokością kontenera tak, żeby po podzieleniu wyszła żądana wartość:
 
 ```css
 :root {
-	--ec-month-cell-height: 110px; /* wysokość wiersza tygodnia, widok miesiąca */
-	--ec-hour-height: 48px;        /* wysokość bloku godzinowego, widok dzień/tydzień */
+	--ec-month-cell-height: 72px; /* wysokość wiersza tygodnia, widok miesiąca */
+	--ec-hour-height: 30px;       /* wysokość bloku godzinowego, widok dzień/tydzień */
 }
 ```
+
+Na mobile (`@media (max-width: 600px)`):
+
+- `--ec-month-cell-height` spada do `58px`: widok miesiąca pokazuje wtedy same
+  liczniki „+N" (klik → popup), bez pasków zdarzeń w komórkach
+  (`month.visibleEventCount: 0` ustawiane w
+  [calendar-init.js](assets/js/calendar-init.js) przez `matchMedia` na tym
+  samym breakpoincie), więc komórka potrzebuje tylko numeru dnia i przycisku.
+- `--ec-hour-height` spada do `24px`: całe pole godzin w widoku dzień/tydzień
+  jest niższe (~582 → ~474 px). ToastUI i tak renderuje siatkę godzin
+  wyższą niż kontener i scrolluje ją wewnątrz — to zamierzone; chodzi tylko
+  o krótszy kontener, żeby łatwiej było przejść ze scrolla godzin na scroll
+  strony.
 
 **Miesiąc — dokładne.** Nagłówek dni jest w bibliotece na sztywno 31px,
 a `isAlways6Weeks` (nienadpisywane w `getCalendarConfig()`, domyślnie `true`
@@ -441,6 +464,18 @@ może się nie odpalić wcale.
 ## Changelog
 
 ### Unreleased
+
+### 1.0.1
+
+- Popup „+N więcej" na mobile — poprawki dotyku i zachowania przy scrollu:
+  - backdrop (warstwa łapiąca tap „obok", zamykająca popup) rozciągnięty na cały ekran z przyciemnieniem — wcześniej pokrywał tylko obszar kalendarza, więc wyśrodkowany na ekranie popup często nie dawał się zamknąć dotknięciem obok
+  - scroll strony blokowany na czas otwartego popupu (klasa `ec-more-open` na `<html>`, dokładana/zdejmowana w `observePopups()`), tylko w `@media (max-width: 600px)` — popup jest tam `position: fixed`, bez blokady „pływał" nad przewijaną treścią
+  - wiersze wydarzeń w popupie: min. 44 px wysokości + 8 px odstępu (WCAG 2.5.5) zamiast wpisywanych inline przez bibliotekę 24 px / 5 px; popup rośnie do `max-height: 80vh`, lista przewija się wewnątrz (kolumna flex)
+- Nazwa dnia w nagłówku popupu „+N więcej" — nadpisany szablon `monthMoreTitleDate` renderuje polski skrót z `dayNamesShort` u źródła; wcześniej biblioteka wstawiała angielski („Sun"), a podmiana po fakcie (`replaceDayNames()`, usunięta jako martwy kod) gubiła się w wyścigu z re-renderem preacta
+- Widok miesiąca na mobile — `month.visibleEventCount: 0` (`matchMedia (max-width: 600px)` w `calendar-init.js`, aktualizowane przy przejściu przez breakpoint) + `--ec-month-cell-height: 58px`: komórki pokazują same liczniki „+N", bez pasków zdarzeń; interakcja przez popup. Na 375 px pasek zdarzenia i tak jest za wąski, żeby w niego celować
+- Licznik „+N" — narastające „+11", „+22" zamiast „+1” przy kolejnych re-renderach (preact wstawiał swoje węzły tekstowe obok podmienionych przez `replaceMoreText()`). Nadpisany szablon `monthGridHeaderExceed` renderuje `+N` u źródła; `replaceMoreText()` usunięte razem z wywołaniami
+- Widok Dzień/Tydzień na mobile — `--ec-hour-height` w `@media (max-width: 600px)` obniżone 30 → 24 px, całe pole godzin jest niższe (~582 → ~474 px, ~58% ekranu); siatka godzin dalej scrolluje się wewnątrz (bez zmian), krótszy kontener ułatwia przejście między scrollem godzin a scrollem strony
+- README: notka o `z-index` na kontenerze osadzającym kalendarz, gdy ten kontener tworzy własny kontekst stakowania (`isolation`/`transform`/…) — inaczej popup „+N więcej" (`position: fixed`) potrafi przegrać z pozycjonowanymi elementami spoza kalendarza
 
 ### 1.0.0
 

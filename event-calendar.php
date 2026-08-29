@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Event Calendar
  * Description: Lightweight, flexible WordPress plugin to create and display events — custom CPT, meta fields, Gutenberg block, shortcode, REST API
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Katarzyna Niklas
  * Text Domain: event-calendar
  * Domain Path: /languages

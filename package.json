@@ -1,6 +1,6 @@
 {
 	"name": "event-calendar-tests",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"private": true,
 	"scripts": {
 		"test": "npm run test:js && npm run test:php",
